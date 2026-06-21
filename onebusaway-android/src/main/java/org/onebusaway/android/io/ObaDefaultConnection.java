@@ -37,6 +37,8 @@ public final class ObaDefaultConnection implements ObaConnection {
         URL url = new URL(uri.toString());
         mConnection = (HttpURLConnection) url.openConnection();
         mConnection.setReadTimeout(30 * 1000);
+        ObaContext defaultContext = ObaApi.getDefaultContext();
+        mConnection.setRequestProperty("Authorization", "Bearer " + defaultContext.getApiKey());
     }
 
     @Override
