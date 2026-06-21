@@ -15,17 +15,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java JDK
+      # sdkmanager from modern Android command-line tools requires JDK 17+.
+      - name: Setup Java 17 for Android SDK tools
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: "tools platform-tools platforms;android-28 build-tools;28.0.3"
+
+      # This old project uses Gradle 4.10.1 / Android Gradle Plugin 3.3.0,
+      # which is safest to run with Java 8.
+      - name: Setup Java 8 for Gradle build
         uses: actions/setup-java@v4
         with:
           java-version: "8"
           distribution: "temurin"
           cache: gradle
-
-      - name: Install Android SDK components
-        run: |
-          yes | sdkmanager --licenses
-          sdkmanager "platforms;android-28" "build-tools;28.0.3"
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -33,7 +42,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew --refresh-dependencies :onebusaway-android:assembleAgencyYGoogleDebug --stacktrace
 
-      - name: Upload a Build Artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: agency-y-google-debug-apk
