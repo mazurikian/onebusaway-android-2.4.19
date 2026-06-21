@@ -9,9 +9,6 @@
 
     "/api/where/arrivals-and-departures-for-stop/1_29261.json": "arrivals_and_departures_for_stop_1_29261",
     "/api/api/where/arrivals-and-departures-for-stop/Hillsborough%20Area%20Regional%20Transit_3105.json": "arrivals_and_departures_for_stop_hart_3105",
-    "/api/api/where/arrivals-and-departures-for-stop/Hillsborough%20Area%20Regional%20Transit_9997.json": "arrivals_and_departures_for_stop_hart_schedule_data",
-    "/api/api/where/arrivals-and-departures-for-stop/Hillsborough%20Area%20Regional%20Transit_9998.json": "arrivals_and_departures_for_stop_hart_bad_data",
-    "/api/api/where/arrivals-and-departures-for-stop/Hillsborough%20Area%20Regional%20Transit_9999.json": "arrivals_and_departures_for_stop_hart_3105_canceled",
     "/api/where/arrivals-and-departures-for-stop/1_75403.json": "arrivals_and_departures_for_stop_1_75403",
     "/api/api/where/arrivals-and-departures-for-stop/Hillsborough%20Area%20Regional%20Transit_1622.json": "arrivals_and_departures_for_stop_hart_1622_one_past_arrival",
     "/api/api/where/arrivals-and-departures-for-stop/Hillsborough%20Area%20Regional%20Transit_6497.json": "arrivals_and_departures_for_stop_hart_6497",
@@ -21,7 +18,6 @@
     "/api/api/where/arrivals-and-departures-for-stop/MTS_11670.json": "arrivals_and_departures_for_stop_mts_11670_route_alerts",
     "/api/api/where/arrivals-and-departures-for-stop/MTS_13353.json": "arrivals_and_departures_for_stop_mts_13353_route_and_stop_alerts",
     "/api/api/where/arrivals-and-departures-for-stop/MTS_11671.json": "arrivals_and_departures_for_stop_mts_11671_filter_route_alerts",
-    "/api/api/where/arrivals-and-departures-for-stop/MTS_9999.json": "sdmts_arrivals_and_departures_for_stop_no_end_time",
     "/api/where/arrivals-and-departures-for-stop/1_10020_occupancy.json": "arrivals_and_departures_for_stop_1_10020_occupancy",
 
     "/api/where/current-time.json": "current_time",

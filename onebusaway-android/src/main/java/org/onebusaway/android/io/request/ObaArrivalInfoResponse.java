@@ -61,8 +61,6 @@ public final class ObaArrivalInfoResponse extends ObaResponseWithRefs {
 
     private final Data data;
 
-    private String mUrl;
-
     ObaArrivalInfoResponse() {
         data = Data.EMPTY_OBJECT;
     }
@@ -97,13 +95,5 @@ public final class ObaArrivalInfoResponse extends ObaResponseWithRefs {
     @Override
     public ObaReferences getRefs() {
         return data.references;
-    }
-
-    public void setUrl(String url) {
-        mUrl = url;
-    }
-
-    public String getUrl() {
-        return mUrl;
     }
 }

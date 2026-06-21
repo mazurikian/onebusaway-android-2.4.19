@@ -15,7 +15,10 @@
  */
 package org.onebusaway.android.io.backup;
 
+import org.onebusaway.android.util.BackupUtils;
+
 import android.content.Context;
+import android.os.Environment;
 import android.preference.Preference;
 import android.util.AttributeSet;
 
@@ -43,11 +46,13 @@ public class SavePreference extends Preference {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        // This is only enabled if the SD card is attached.
+        return Environment.MEDIA_MOUNTED
+                .equals(Environment.getExternalStorageState());
     }
 
     @Override
     protected void onClick() {
-        super.onClick();
+        BackupUtils.save(getContext());
     }
 }

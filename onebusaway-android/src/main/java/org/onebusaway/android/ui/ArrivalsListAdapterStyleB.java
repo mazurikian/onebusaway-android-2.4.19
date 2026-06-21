@@ -18,10 +18,23 @@
  */
 package org.onebusaway.android.ui;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
+import org.onebusaway.android.R;
+import org.onebusaway.android.app.Application;
+import org.onebusaway.android.io.ObaAnalytics;
+import org.onebusaway.android.io.elements.ObaArrivalInfo;
+import org.onebusaway.android.io.elements.ObaRegion;
+import org.onebusaway.android.io.elements.OccupancyState;
+import org.onebusaway.android.provider.ObaContract;
+import org.onebusaway.android.util.ArrivalInfoUtils;
+import org.onebusaway.android.util.EmbeddedSocialUtils;
+import org.onebusaway.android.util.UIUtils;
+import org.onebusaway.util.comparators.AlphanumComparator;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
@@ -33,21 +46,12 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.graphics.drawable.DrawableCompat;
-
-import org.onebusaway.android.R;
-import org.onebusaway.android.io.elements.ObaArrivalInfo;
-import org.onebusaway.android.io.elements.OccupancyState;
-import org.onebusaway.android.io.elements.Status;
-import org.onebusaway.android.provider.ObaContract;
-import org.onebusaway.android.util.ArrivalInfoUtils;
-import org.onebusaway.android.util.UIUtils;
-import org.onebusaway.util.comparators.AlphanumComparator;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.graphics.drawable.DrawableCompat;
 
 /**
  * Styles of arrival times used by York Region Transit
@@ -154,6 +158,9 @@ public class ArrivalsListAdapterStyleB extends ArrivalsListAdapterBase<CombinedA
         ImageButton mapImageBtn = view.findViewById(R.id.mapImageBtn);
         mapImageBtn.setColorFilter(r.getColor(R.color.theme_primary));
 
+        ImageButton discussBtn = view.findViewById(R.id.route_discussion);
+        discussBtn.setColorFilter(r.getColor(R.color.theme_primary));
+
         ImageButton routeMoreInfo = view.findViewById(R.id.route_more_info);
         routeMoreInfo.setColorFilter(r.getColor(R.color.switch_thumb_normal_material_dark));
 
@@ -181,6 +188,19 @@ public class ArrivalsListAdapterStyleB extends ArrivalsListAdapterBase<CombinedA
 
         // Setup map
         mapImageBtn.setOnClickListener(v -> mFragment.showRouteOnMap(stopInfo));
+
+        // Setup discussion
+        discussBtn.setOnClickListener(v -> {
+            ObaAnalytics.reportUiEvent(FirebaseAnalytics.getInstance(getContext()),
+                    context.getString(R.string.analytics_label_button_press_social_route_style_b),
+                    null);
+            mFragment.openRouteDiscussion(arrivalInfo.getRouteId());
+        });
+
+        ObaRegion currentRegion = Application.get().getCurrentRegion();
+        if (currentRegion != null && !EmbeddedSocialUtils.isSocialEnabled()) {
+            discussBtn.setVisibility(View.GONE);
+        }
 
         // Setup more
         routeMoreInfo.setOnClickListener(new View.OnClickListener() {
@@ -232,12 +252,6 @@ public class ArrivalsListAdapterStyleB extends ArrivalsListAdapterBase<CombinedA
             }
 
             occupancyView = (ConstraintLayout) inflater.inflate(R.layout.occupancy, null);
-
-            // CANCELED trips
-            if (Status.CANCELED.equals(stopInfo.getStatus())) {
-                // Strike through the text fields
-                scheduleView.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
-            }
 
             // Occupancy
             if (stopInfo.getPredictedOccupancy() != null) {

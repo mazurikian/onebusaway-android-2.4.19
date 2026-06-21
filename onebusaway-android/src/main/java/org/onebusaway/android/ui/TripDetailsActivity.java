@@ -16,21 +16,18 @@
  */
 package org.onebusaway.android.ui;
 
+import org.onebusaway.android.util.FragmentUtils;
+import org.onebusaway.android.util.UIUtils;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import org.onebusaway.android.util.FragmentUtils;
-import org.onebusaway.android.util.UIUtils;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 public class TripDetailsActivity extends AppCompatActivity {
-
-    private static final String TAG = "TripDetailsActivity";
 
     public static class Builder {
 
@@ -51,16 +48,6 @@ public class TripDetailsActivity extends AppCompatActivity {
 
         public Builder setScrollMode(String mode) {
             mIntent.putExtra(TripDetailsListFragment.SCROLL_MODE, mode);
-            return this;
-        }
-
-        public Builder setActiveTrip(Boolean b) {
-            mIntent.putExtra(TripDetailsListFragment.TRIP_ACTIVE, b);
-            return this;
-        }
-
-        public Builder setDestinationId(String stopId) {
-            mIntent.putExtra(TripDetailsListFragment.DEST_ID, stopId);
             return this;
         }
 
@@ -98,11 +85,11 @@ public class TripDetailsActivity extends AppCompatActivity {
 
         FragmentManager fm = getSupportFragmentManager();
 
-        if (findFragmentByTag() == null) {
+        if (fm.findFragmentById(android.R.id.content) == null) {
             TripDetailsListFragment list = new TripDetailsListFragment();
             list.setArguments(FragmentUtils.getIntentArgs(getIntent()));
 
-            fm.beginTransaction().add(android.R.id.content, list, TripDetailsListFragment.TAG).commit();
+            fm.beginTransaction().add(android.R.id.content, list).commit();
         }
     }
 
@@ -113,30 +100,5 @@ public class TripDetailsActivity extends AppCompatActivity {
             return true;
         }
         return false;
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == TripDetailsListFragment.REQUEST_ENABLE_LOCATION) {
-            TripDetailsListFragment tripDetListFrag = (TripDetailsListFragment) findFragmentByTag();
-            if(tripDetListFrag == null) {
-                tripDetListFrag = new TripDetailsListFragment();
-
-                // setting arguments if we could
-                tripDetListFrag.setArguments(FragmentUtils.getIntentArgs(getIntent()));
-                getSupportFragmentManager().beginTransaction().
-                        add(android.R.id.content, tripDetListFrag, TripDetailsListFragment.TAG).commit();
-            }
-            tripDetListFrag.onActivityResult(requestCode, resultCode, data);
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
-
-    /**
-     * @return Fragment {@link TripDetailsListFragment object}
-     */
-    private Fragment findFragmentByTag() {
-        return getSupportFragmentManager().findFragmentByTag(TripDetailsListFragment.TAG);
     }
 }

@@ -15,11 +15,6 @@
  */
 package org.onebusaway.android.io.elements;
 
-import org.onebusaway.android.R;
-import org.onebusaway.android.app.Application;
-
-import android.content.Context;
-
 import java.io.Serializable;
 
 public final class ObaArrivalInfo implements Serializable{
@@ -107,7 +102,7 @@ public final class ObaArrivalInfo implements Serializable{
 
     private final String historicalOccupancy;
 
-    private final String occupancyStatus;
+    private final String predictedOccupancy;
 
     ObaArrivalInfo() {
         routeId = "";
@@ -136,7 +131,7 @@ public final class ObaArrivalInfo implements Serializable{
         totalStopsInTrip = 0;
         blockTripSequence = 0;
         historicalOccupancy = "";
-        occupancyStatus = "";
+        predictedOccupancy = "";
     }
 
     /**
@@ -263,23 +258,11 @@ public final class ObaArrivalInfo implements Serializable{
 
     /**
      * @return Whether this arrival has prediction information. If the 'predicted'
-     * value is set and the predicted arrival OR departure time is valid, then return true;
-     * otherwise it is inferred from the existence of a positive predicted start OR end time.
+     * value is set, then that is used; otherwise it is inferred from the existence
+     * of a non-zero predicted start or end time.
      */
     public boolean getPredicted() {
-        if (predicted != null) {
-            return predicted && isPredictedTimeValid();
-        } else {
-            return isPredictedTimeValid();
-        }
-    }
-
-    /**
-     * Returns true if the predicted arrival time or predicted departure time is greater than 0
-     * @return true if the predicted arrival time or predicted departure time is greater than 0
-     */
-    private boolean isPredictedTimeValid() {
-        return predictedArrivalTime > 0 || predictedDepartureTime > 0;
+        return (predicted != null) ? predicted : (predictedDepartureTime != 0);
     }
 
     /**
@@ -349,32 +332,7 @@ public final class ObaArrivalInfo implements Serializable{
     /**
      * @return the predicted occupancy of the vehicle when it arrives at this stop, or null if the occupancy is unknown
      */
-    public Occupancy getOccupancyStatus() {
-        return Occupancy.fromString(occupancyStatus);
-    }
-
-    /**
-     * @return a String indicating the number of cars, if this is a light rail arrival.
-     *         Otherwise returns null.
-     */
-    public String getNumCars(Context context) {
-        ObaRegion currentRegion = Application.get().getCurrentRegion();
-        if(currentRegion == null) return null;
-        boolean isPugetSoundRegion = currentRegion
-                .getName().equals("Puget Sound");
-        boolean vehicleIdAvailable = this.getVehicleId() != null;
-        if (!vehicleIdAvailable || !isPugetSoundRegion) {
-            return null;
-        }
-
-        String[] splitByBracket = this.getVehicleId().split("\\[");
-        if (splitByBracket.length == 2) {
-            int numCars = splitByBracket[1].split("-").length;
-            return context.getResources().getQuantityString(
-                    R.plurals.stop_info_car_count, (int) numCars,
-                    numCars);
-        } else {
-            return null;
-        }
+    public Occupancy getPredictedOccupancy() {
+        return Occupancy.fromString(predictedOccupancy);
     }
 }

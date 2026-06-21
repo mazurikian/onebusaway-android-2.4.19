@@ -55,6 +55,7 @@
         <item>Show on map</item>
     </string-array>
     <string-array name="reminder_time">
+        <item>No reminder</item>
         <item>1 minute</item>
         <item>3 minutes</item>
         <item>5 minutes</item>
@@ -90,25 +91,10 @@
         <item>The bus doesn\'t stop here</item>
         <item>Something else</item>
     </string-array>
-    <string-array name="preferred_map_options">
-        <item>@string/preferences_preferred_map_option_normal2d</item>
-        <item>@string/preferences_preferred_map_option_normal3d</item>
-        <item>@string/preferences_preferred_map_option_satellite</item>
-    </string-array>
     <string-array name="preferred_units_options">
         <item>@string/preferences_preferred_units_option_automatic</item>
         <item>@string/preferences_preferred_units_option_metric</item>
         <item>@string/preferences_preferred_units_option_imperial</item>
-    </string-array>
-    <string-array name="preferred_temp_unit_options">
-        <item>@string/preferences_preferred_units_option_automatic</item>
-        <item>@string/fahrenheit</item>
-        <item>@string/celsius</item>
-    </string-array>
-    <string-array name="app_theme_options">
-        <item>@string/preferences_app_theme_option_system_default</item>
-        <item>@string/preferences_app_theme_option_light</item>
-        <item>@string/preferences_app_theme_option_dark</item>
     </string-array>
     <string-array name="arrival_info_style_options">
         <item>@string/preferences_arrival_info_style_options_a</item>
@@ -157,12 +143,14 @@
         <item>@string/rt_infrastructure_problem</item>
         <item>@string/rt_arrival_problem</item>
         <item>@string/rt_app_feedback</item>
+        <item>@string/rt_ideas</item>
     </string-array>
     <string-array name="report_types_desc">
         <item>@string/rt_message_customer_service</item>
         <item>@string/rt_message_infrastructure_problem</item>
         <item>@string/rt_message_arrival_problem</item>
         <item>@string/rt_message_app_feedback</item>
+        <item>@string/rt_message_ideas</item>
     </string-array>
 
     <array name="report_types_icons">
@@ -170,6 +158,7 @@
         <item>@drawable/ic_stop_flag_triangle</item>
         <item>@drawable/ic_arrival_time</item>
         <item>@drawable/ic_app_feedback</item>
+        <item>@drawable/ic_light_bulb</item>
     </array>
 
     <string-array name="report_types_without_open311">
@@ -177,6 +166,7 @@
         <item>@string/rt_stop_problem</item>
         <item>@string/rt_arrival_problem</item>
         <item>@string/rt_app_feedback</item>
+        <item>@string/rt_ideas</item>
     </string-array>
 
     <string-array name="report_types_desc_without_open311">
@@ -184,6 +174,7 @@
         <item>@string/rt_message_stop_problem</item>
         <item>@string/rt_message_arrival_problem</item>
         <item>@string/rt_message_app_feedback</item>
+        <item>@string/rt_message_ideas</item>
     </string-array>
 
     <array name="report_types_icons_without_open311">
@@ -191,6 +182,7 @@
         <item>@drawable/ic_stop_flag_triangle</item>
         <item>@drawable/ic_arrival_time</item>
         <item>@drawable/ic_app_feedback</item>
+        <item>@drawable/ic_light_bulb</item>
     </array>
 
     <string-array name="report_stop_issue_tutorial_desc">

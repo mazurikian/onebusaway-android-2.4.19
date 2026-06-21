@@ -16,6 +16,29 @@
  */
 package org.onebusaway.android.app;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.analytics.FirebaseAnalytics;
+
+import com.microsoft.embeddedsocial.sdk.EmbeddedSocial;
+
+import org.onebusaway.android.BuildConfig;
+import org.onebusaway.android.R;
+import org.onebusaway.android.io.ObaAnalytics;
+import org.onebusaway.android.io.ObaApi;
+import org.onebusaway.android.io.elements.ObaRegion;
+import org.onebusaway.android.provider.ObaContract;
+import org.onebusaway.android.report.ui.util.SocialReportHandler;
+import org.onebusaway.android.ui.social.SocialAppProfile;
+import org.onebusaway.android.ui.social.SocialNavigationDrawerHandler;
+import org.onebusaway.android.util.BuildFlavorUtils;
+import org.onebusaway.android.util.EmbeddedSocialUtils;
+import org.onebusaway.android.util.LocationUtils;
+import org.onebusaway.android.util.PreferenceUtils;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -27,50 +50,24 @@ import android.hardware.GeomagneticField;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
-import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-import androidx.multidex.MultiDexApplication;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.analytics.FirebaseAnalytics;
-
-import com.onebusaway.plausible.android.Plausible;
-import com.onesignal.OneSignal;
-
-import org.onebusaway.android.BuildConfig;
-import org.onebusaway.android.R;
-import org.onebusaway.android.donations.DonationsManager;
-import org.onebusaway.android.io.ObaAnalytics;
-import org.onebusaway.android.io.ObaApi;
-import org.onebusaway.android.io.elements.ObaRegion;
-import org.onebusaway.android.provider.ObaContract;
-import org.onebusaway.android.travelbehavior.TravelBehaviorManager;
-import org.onebusaway.android.util.BuildFlavorUtils;
-import org.onebusaway.android.util.LocationUtils;
-import org.onebusaway.android.util.PreferenceUtils;
-import org.onebusaway.android.util.ReminderUtils;
-import org.onebusaway.android.widealerts.GtfsAlerts;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ProcessLifecycleOwner;
+import androidx.multidex.MultiDexApplication;
 import edu.usf.cutr.open311client.Open311Manager;
 import edu.usf.cutr.open311client.models.Open311Option;
 
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
-import static org.onebusaway.android.util.UIUtils.setAppTheme;
-import java.nio.charset.StandardCharsets;
 
 public class Application extends MultiDexApplication {
 
@@ -81,13 +78,8 @@ public class Application extends MultiDexApplication {
 
     public static final String CHANNEL_TRIP_PLAN_UPDATES_ID = "trip_plan_updates";
     public static final String CHANNEL_ARRIVAL_REMINDERS_ID = "arrival_reminders";
-    public static final String CHANNEL_DESTINATION_ALERT_ID = "destination_alerts";
 
     private SharedPreferences mPrefs;
-
-    private DonationsManager mDonationsManager;
-
-    private GtfsAlerts mGtfsAlerts;
 
     private static Application mApp;
 
@@ -104,9 +96,10 @@ public class Application extends MultiDexApplication {
     // Magnetic declination is based on location, so track this centrally too.
     static GeomagneticField mGeomagneticField = null;
 
-    private FirebaseAnalytics mFirebaseAnalytics;
+    // Workaround for #933 until ES SDK doesn't run Services in the background
+    static boolean mEmbeddedSocialInitiated = false;
 
-    private Plausible mPlausible;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     @Override
     public void onCreate() {
@@ -115,6 +108,16 @@ public class Application extends MultiDexApplication {
         mApp = this;
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
+        // Make sure ES SDK only runs when the app is in the foreground
+        // (Workaround for #933 until ES SDK doesn't run Services in the background)
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(
+                new DefaultLifecycleObserver() {
+                    @Override
+                    public void onStart(@NonNull LifecycleOwner owner) {
+                        setUpSocial();
+                    }
+                });
+
         initOba();
         initObaRegion();
         initOpen311(getCurrentRegion());
@@ -122,16 +125,6 @@ public class Application extends MultiDexApplication {
         reportAnalytics();
 
         createNotificationChannels();
-
-        TravelBehaviorManager.startCollectingData(getApplicationContext());
-
-        incrementAppLaunchCount();
-
-        initOneSignal();
-
-        mDonationsManager = new DonationsManager(mPrefs, mFirebaseAnalytics, getResources(), getAppLaunchCount());
-
-        mGtfsAlerts = new GtfsAlerts(getApplicationContext());
     }
 
     /**
@@ -154,24 +147,6 @@ public class Application extends MultiDexApplication {
 
     public static SharedPreferences getPrefs() {
         return get().mPrefs;
-    }
-
-    public static DonationsManager getDonationsManager() { return get().mDonationsManager; }
-
-    public static GtfsAlerts getGtfsAlerts() {
-        return get().mGtfsAlerts;
-    }
-
-    private static String appLaunchCountPreferencesKey = "appLaunchCountPreferencesKey";
-
-    private void incrementAppLaunchCount() {
-        int count = PreferenceUtils.getInt(appLaunchCountPreferencesKey, 0);
-        count += 1;
-        PreferenceUtils.saveInt(appLaunchCountPreferencesKey, count);
-    }
-
-    public int getAppLaunchCount() {
-        return PreferenceUtils.getInt(appLaunchCountPreferencesKey, 0);
     }
 
     /**
@@ -352,7 +327,6 @@ public class Application extends MultiDexApplication {
             if (regionChanged && region.getOtpBaseUrl() != null) {
                 setCustomOtpApiUrl(null);
                 setUseOldOtpApiUrlVersion(false);
-                buildPlausibleInstance(region);
             }
         } else {
             //User must have just entered a custom API URL via Preferences, so clear the region info
@@ -362,35 +336,6 @@ public class Application extends MultiDexApplication {
         // Init the reporting with the new endpoints
         initOpen311(region);
     }
-
-    /**
-     * Return Plausible instance for the application
-     * @return Plausible instance
-     */
-    public Plausible getPlausibleInstance() {
-        if(mPlausible == null) {
-            buildPlausibleInstance(getCurrentRegion());
-        }
-        return mPlausible;
-    }
-
-    /**
-     * Build the Plausible instance for the application
-     * Include the domain and the plausible server url for the current region
-     * @param region
-     */
-    private void buildPlausibleInstance(ObaRegion region) {
-        mPlausible = null;
-        if (region == null || region.getObaBaseUrl() == null || region.getPlausibleAnalyticsServerUrl() == null) return;
-        String domain;
-        try {
-            domain = new URI(region.getObaBaseUrl()).getHost();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        mPlausible = new Plausible(this, domain, region.getPlausibleAnalyticsServerUrl());
-    }
-
 
     /**
      * Gets the date at which the region information was last updated, in the number of
@@ -508,7 +453,6 @@ public class Application extends MultiDexApplication {
         }
 
         checkArrivalStylePreferenceDefault();
-        checkDarkMode();
 
         // Get the current app version.
         PackageManager pm = getPackageManager();
@@ -551,15 +495,6 @@ public class Application extends MultiDexApplication {
                     Log.d(TAG, "Using arrival info style B (Cards) as default preference");
                     break;
             }
-        }
-    }
-
-    private void checkDarkMode() {
-        String appThemePrefKey = getResources()
-                .getString(R.string.preference_key_app_theme);
-        String appThemePref = mPrefs.getString(appThemePrefKey, null);
-        if (appThemePref != null) {
-            setAppTheme(appThemePref);
         }
     }
 
@@ -608,25 +543,43 @@ public class Application extends MultiDexApplication {
     private void reportAnalytics() {
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         if (getCustomApiUrl() == null && getCurrentRegion() != null) {
-            buildPlausibleInstance(getCurrentRegion());
-            ObaAnalytics.setRegion(mPlausible, mFirebaseAnalytics, getCurrentRegion().getName());
+            ObaAnalytics.setRegion(mFirebaseAnalytics, getCurrentRegion().getName());
         } else if (Application.get().getCustomApiUrl() != null) {
             String customUrl = null;
             MessageDigest digest = null;
             try {
                 digest = MessageDigest.getInstance("SHA-1");
-                digest.update(getCustomApiUrl().getBytes(StandardCharsets.UTF_8));
+                digest.update(getCustomApiUrl().getBytes());
                 customUrl = getString(R.string.analytics_label_custom_url) +
                         ": " + getHex(digest.digest());
             } catch (Exception e) {
                 customUrl = Application.get().getString(R.string.analytics_label_custom_url);
             }
-            ObaAnalytics.setRegion(mPlausible, mFirebaseAnalytics, customUrl);
+            ObaAnalytics.setRegion(mFirebaseAnalytics, customUrl);
         }
         Boolean experimentalRegions = getPrefs().getBoolean(getString(R.string.preference_key_experimental_regions),
                 Boolean.FALSE);
         Boolean autoRegion = getPrefs().getBoolean(getString(R.string.preference_key_auto_select_region),
                 true);
+    }
+
+    /**
+     * Initializes Embedded Social if the device and current build support social functionality
+     * This method is only public as a workaround to avoid running ES SDK in the background - see
+     * #953.  When ES SDK no longer runs servers in the background this can be made private again
+     * and all ES SDK initialization can happen in Application.onCreate().
+     */
+    public synchronized void setUpSocial() {
+        if (!mEmbeddedSocialInitiated) {
+            if (EmbeddedSocialUtils.isBuildVersionSupportedBySocial() &&
+                    EmbeddedSocialUtils.isSocialApiKeyDefined()) {
+                EmbeddedSocial.init(mApp, R.raw.embedded_social_config, BuildConfig.EMBEDDED_SOCIAL_API_KEY, null);
+                EmbeddedSocial.setReportHandler(new SocialReportHandler());
+                EmbeddedSocial.setNavigationDrawerHandler(new SocialNavigationDrawerHandler());
+                EmbeddedSocial.setAppProfile(new SocialAppProfile());
+            }
+            mEmbeddedSocialInitiated = true;
+        }
     }
 
     /**
@@ -657,44 +610,10 @@ public class Application extends MultiDexApplication {
                     NotificationManager.IMPORTANCE_DEFAULT);
             channel2.setDescription("Notifications to remind the user of an arriving bus.");
 
-            NotificationChannel channel3 = new NotificationChannel(
-                    CHANNEL_DESTINATION_ALERT_ID,
-                    "Destination alerts",
-                    NotificationManager.IMPORTANCE_LOW);
-            channel3.setDescription("All notifications relating to Destination alerts");
-
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(channel1);
             manager.createNotificationChannel(channel2);
-            manager.createNotificationChannel(channel3);
         }
-    }
-
-    public static Boolean isIgnoringBatteryOptimizations(Context applicationContext) {
-        PowerManager pm = (PowerManager) applicationContext.getSystemService(Context.POWER_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                pm.isIgnoringBatteryOptimizations(applicationContext.getPackageName())) {
-            return true;
-        }
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return null;
-        }
-
-        return false;
-    }
-
-    private void initOneSignal() {
-        OneSignal.initWithContext(this, BuildConfig.ONESIGNAL_APP_ID);
-
-        // Handle click on the notification
-        OneSignal.getNotifications().addClickListener(iNotificationClickEvent -> {
-            ReminderUtils.openStopInfo(getBaseContext(), iNotificationClickEvent.getNotification());
-        });
-    }
-
-    public static String getUserPushNotificationID() {
-        return OneSignal.getUser().getPushSubscription().getId();
     }
 
 }

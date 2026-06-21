@@ -15,7 +15,9 @@
  */
 package org.onebusaway.android.util;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,11 +42,18 @@ public abstract class ArrayAdapter<T> extends android.widget.ArrayAdapter<T> {
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
+    @TargetApi(11)
     public void setData(List<T> data) {
         setNotifyOnChange(false);  // This prevents list from scrolling back to top on clear()
         clear();
         if (data != null) {
-            addAll(data);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                addAll(data);
+            } else {
+                for (T info : data) {
+                    add(info);
+                }
+            }
         }
         // Since we're calling setNotifyOnChange(false), we need to call notifyDataSetChanged() ourselves
         notifyDataSetChanged();

@@ -15,7 +15,10 @@
  */
 package org.onebusaway.android.io.backup;
 
+import org.onebusaway.android.util.BackupUtils;
+
 import android.content.Context;
+import android.os.Environment;
 import android.preference.Preference;
 import android.util.AttributeSet;
 
@@ -43,11 +46,16 @@ public class RestorePreference extends Preference {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        // This is only enabled if the SD card is attached.
+        final String state = Environment.getExternalStorageState();
+        // Also, this is only enabled if there's a backup file
+        return (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state) ||
+                Environment.MEDIA_MOUNTED.equals(state)) &&
+                Backup.isRestoreAvailable(getContext());
     }
 
     @Override
     protected void onClick() {
-        super.onClick();
+        BackupUtils.restore(getContext());
     }
 }

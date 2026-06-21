@@ -58,8 +58,6 @@ public class RegionUtils {
 
     public static final double METERS_TO_MILES = 0.000621371;
 
-    public static final double METERS_TO_FEET = 3.28084;
-
     private static final int DISTANCE_LIMITER = 100;  // miles
 
     /**
@@ -417,11 +415,7 @@ public class RegionUtils {
                     ObaContract.Regions.SUPPORTS_EMBEDDED_SOCIAL,
                     ObaContract.Regions.PAYMENT_ANDROID_APP_ID,
                     ObaContract.Regions.PAYMENT_WARNING_TITLE,
-                    ObaContract.Regions.PAYMENT_WARNING_BODY,
-                    ObaContract.Regions.TRAVEL_BEHAVIOR_DATA_COLLECTION,
-                    ObaContract.Regions.ENROLL_PARTICIPANTS_IN_STUDY,
-                    ObaContract.Regions.SIDECAR_BASE_URL,
-                    ObaContract.Regions.PLAUSIBLE_ANALYTICS_SERVER_URL
+                    ObaContract.Regions.PAYMENT_WARNING_BODY
             };
 
             ContentResolver cr = context.getContentResolver();
@@ -471,11 +465,7 @@ public class RegionUtils {
                         c.getInt(15) > 0,            // Supports Embedded Social
                         c.getString(16),              // Android App ID for mobile fare payment app of region
                         c.getString(17),               // Payment Warning Title
-                        c.getString(18),    // Payment Warning Body
-                        c.getInt(19) > 0, // travel behavior data collection enabled for region
-                        c.getInt(20) > 0, // enrolling participants for travel behavior data collection
-                        c.getString(21), //Sidecar base URL
-                        c.getString(22) // Plausible analytics server url
+                        c.getString(18)               // Payment Warning Body
                 ));
 
             } while (c.moveToNext());
@@ -659,14 +649,10 @@ public class RegionUtils {
                 BuildConfig.FIXED_REGION_OTP_BASE_URL,
                 BuildConfig.FIXED_REGION_OTP_CONTACT_EMAIL,
                 BuildConfig.FIXED_REGION_SUPPORTS_OTP_BIKESHARE,
-                false,
+                BuildConfig.FIXED_REGION_SUPPORTS_EMBEDDEDSOCIAL,
                 BuildConfig.FIXED_REGION_PAYMENT_ANDROID_APP_ID,
                 BuildConfig.FIXED_REGION_PAYMENT_WARNING_TITLE,
-                BuildConfig.FIXED_REGION_PAYMENT_WARNING_BODY,
-                BuildConfig.FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION,
-                BuildConfig.FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY,
-                BuildConfig.FIXED_REGION_SIDECAR_BASE_URL,
-                BuildConfig.FIXED_REGION_PLAUSIBLE_ANALYTICS_SERVER_URL);
+                BuildConfig.FIXED_REGION_PAYMENT_WARNING_BODY);
         return region;
     }
 
@@ -741,12 +727,6 @@ public class RegionUtils {
         values.put(ObaContract.Regions.PAYMENT_ANDROID_APP_ID, region.getPaymentAndroidAppId());
         values.put(ObaContract.Regions.PAYMENT_WARNING_TITLE, region.getPaymentWarningTitle());
         values.put(ObaContract.Regions.PAYMENT_WARNING_BODY, region.getPaymentWarningBody());
-        values.put(ObaContract.Regions.TRAVEL_BEHAVIOR_DATA_COLLECTION,
-                region.isTravelBehaviorDataCollectionEnabled() ? 1 : 0);
-        values.put(ObaContract.Regions.ENROLL_PARTICIPANTS_IN_STUDY,
-                region.isEnrollParticipantsInStudy() ? 1 : 0);
-        values.put(ObaContract.Regions.SIDECAR_BASE_URL, region.getSidecarBaseUrl());
-        values.put(ObaContract.Regions.PLAUSIBLE_ANALYTICS_SERVER_URL, region.getPlausibleAnalyticsServerUrl());
         return values;
     }
 

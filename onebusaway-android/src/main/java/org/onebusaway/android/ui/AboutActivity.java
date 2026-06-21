@@ -16,19 +16,16 @@
 
 package org.onebusaway.android.ui;
 
+import com.google.android.material.appbar.CollapsingToolbarLayout;
+
+import org.onebusaway.android.R;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.text.Html;
-import android.text.Spannable;
 import android.widget.TextView;
-
-import com.google.android.material.appbar.CollapsingToolbarLayout;
-import com.google.android.material.textview.MaterialTextView;
-
-import org.onebusaway.android.R;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -56,7 +53,6 @@ public class AboutActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         TextView tv = (TextView) findViewById(R.id.about_text);
-        MaterialTextView version = findViewById(R.id.version);
         String versionString = "";
         int versionCode = 0;
         try {
@@ -69,14 +65,16 @@ public class AboutActivity extends AppCompatActivity {
 
         StringBuilder builder = new StringBuilder();
         // Version info
-        builder.append("Version: ")
+        builder.append("v")
                 .append(versionString)
                 .append(" (")
                 .append(versionCode)
-                .append(")\n");
+                .append(")\n\n");
 
-        // Majority of content comes from a string resource:
-        version.setText(builder.toString());
-        tv.setText((Spannable) Html.fromHtml(getString(R.string.about_content)));
+        // Majority of content from string resource
+        builder.append(getString(R.string.about_text));
+        builder.append("\n\n");
+
+        tv.setText(builder.toString());
     }
 }

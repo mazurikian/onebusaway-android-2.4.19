@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2010-2017 Paul Watts (paulcwatts@gmail.com),
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2010-2017 Paul Watts (paulcwatts@gmail.com),
     University of South Florida (sjbarbeau@gmail.com)
     Benjamin Du (bendu@me.com),
     Microsoft Corporation
@@ -22,8 +23,12 @@
     <!-- Navigation Drawer -->
     <string name="navdrawer_item_nearby">Nearby</string>
     <string name="navdrawer_item_starred_stops">Starred stops</string>
-    <string name="navdrawer_item_starred_routes">Starred routes</string>
     <string name="navdrawer_item_my_reminders">My reminders</string>
+    <string name="navdrawer_item_profile">My profile</string>
+    <string name="navdrawer_item_sign_in">Sign in</string>
+    <string name="navdrawer_item_popular">Popular</string>
+    <string name="navdrawer_item_pin">My pins</string>
+    <string name="navdrawer_item_activity_feed">Activity feed</string>
     <string name="navdrawer_item_settings">Settings</string>
     <string name="navdrawer_item_help">Help</string>
     <string name="navdrawer_item_send_feedback">Send feedback</string>
@@ -102,7 +107,16 @@
     <string name="map_option_search">Search</string>
     <string name="main_help_title">Help</string>
     <string name="main_help_whatsnew_title">What\'s New?</string>
-    <string name="main_help_whatsnew">• <b>Bug fixes</b> Several bug fixes and fit and finish improvements. - See https://bit.ly/oba-android-releases</string>
+    <string name="main_help_whatsnew">&#8226;\u0020
+        <b>Improved reminder reliability</b>
+        - Various changes to make reminders alert you at the right time.\n&#8226;\u0020
+        <b>Improved notification management (Android 8.0 Oreo and up)</b>
+        - Manage notification sounds using the Android system menu under \"Apps\".\n&#8226;\u0020
+        <b>Improved trip status icon</b>
+        - Thanks Pokechu22!\n&#8226;\u0020
+        <b>Bug fixes</b>
+        - See http://bit.ly/oba-android-releases
+    </string>
     <string name="main_help_close">Close</string>
     <string name="main_help_legend_title">Legend</string>
     <string name="main_help_legend_ontime">Green means \"On time\"</string>
@@ -111,16 +125,11 @@
     <string name="main_help_legend_scheduled">Gray means \"Scheduled arrival\" - We don\'t know
         where the bus is now, but the schedule says there is an upcoming arrival
     </string>
-    <string name="main_help_legend_canceled">Gray with strikethrough means the trip has been
-        canceled - this bus is NOT coming
-    </string>
     <string name="main_nolocation_title">Location not enabled</string>
     <string name="main_nolocation">OneBusAway would like your location, do you want to enable it
         now?
     </string>
     <string name="main_never_ask_again">Never ask again</string>
-    <string name="main_never_show_again">Never show again</string>
-
     <string name="main_waiting_for_location">Trying to get a fix on your location&#8230;</string>
     <string name="no_location_permission">Unable to get your location.  Please give app location permissions via system settings.</string>
     <string name="main_outofrange_title">Out of range</string>
@@ -132,12 +141,11 @@
 
     <string name="bus_options_menu_add_star">Add star to route</string>
     <string name="bus_options_menu_remove_star">Remove star from route</string>
-    <string name="bus_options_menu_show_vehicles_on_map">Show vehicles on map</string>
+    <string name="bus_options_menu_show_route_on_map">Show route on map</string>
     <string name="bus_options_menu_show_trip_details">Show trip status</string>
     <string name="bus_options_menu_set_reminder">Set a reminder</string>
     <string name="bus_options_menu_edit_reminder">Edit this reminder</string>
     <string name="bus_options_menu_show_only_this_route">Show only this route</string>
-    <string name="bus_options_menu_show_all_routes">"Show all routes"</string>
     <string name="bus_options_menu_show_route_schedule">Show route schedule</string>
     <string name="bus_options_menu_report_trip_problem">Report arrival time problem</string>
 
@@ -209,20 +217,9 @@
             min early
         </item>
     </plurals>
-    <plurals name="stop_info_car_count">
-        <item quantity="one">1 car</item>
-        <!-- Entire element below should be on a single line if XML is reformatted - see #99 -->
-        <item quantity="other">
-            <xliff:g id="count">%d</xliff:g>
-            cars
-        </item>
-    </plurals>
     <string name="stop_info_scheduled_arrival">Scheduled arrival</string>
     <string name="stop_info_scheduled_departure">Scheduled departure</string>
     <string name="stop_info_scheduled">Scheduled</string>
-    <string name="stop_info_canceled_arrival">CANCELED arrival</string>
-    <string name="stop_info_canceled_departure">CANCELED departure</string>
-    <string name="stop_info_canceled">CANCELED</string>
     <string name="stop_info_time_arriving_at">Arriving at %1s</string>
     <string name="stop_info_time_departing_at">Departing at %1s</string>
     <string name="stop_info_time_arrived_at">Arrived at %1s</string>
@@ -244,7 +241,6 @@
     <string name="stop_info_option_removestar">Remove star from stop</string>
     <string name="stop_info_option_report_problem">Report stop problem</string>
     <string name="stop_info_option_night_light">Night light</string>
-    <string name="stop_info_option_hide_alerts">Hide active alerts</string>
     <string name="stop_info_nodata_minutes">No arrivals in the next %1$d min.</string>
     <string name="stop_info_nodata_minutes_short_format">%1$d+ min</string>
     <plurals name="stop_info_nodata_hours_minutes">
@@ -300,53 +296,6 @@
         show detailed arrivals list, or press Back button to hide.
     </string>
 
-    <!-- Destination reminders -->
-    <string name="destination_reminder_dialog_title">Destination reminder (beta)</string>
-    <string name="destination_reminder_dialog_msg">Would you like to be notified when you are approaching this stop?</string>
-    <string name="destination_reminder_confirm">Yes</string>
-    <string name="destination_reminder_cancel">Cancel</string>
-    <string name="destination_reminder_title">Destination reminder is set</string>
-    <string name="destination_reminder_cancel_trip">Cancel reminder</string>
-    <string name="destination_reminder_beta_title">Destination reminders are in beta</string>
-    <string name="destination_reminder_beta_summary">Destination reminders rely on GPS, which is not always reliable and will not work indoors, underground, or in areas without a clear view of the sky. Always be aware of your surroundings.</string>
-
-    <!-- Destination reminder voice commands -->
-    <string name="destination_voice_get_ready">Get ready!</string>
-    <string name="destination_voice_request_stop">Exit at the next stop!</string>
-    <string name="destination_voice_arriving_destination">Arriving at destination!</string>
-
-    <!-- Destination reminder feedback notifications -->
-    <string name="feedback_notify_title">Help improve destination reminders</string>
-    <string name="feedback_notify_dialog_msg">Were you notified at the right time?</string>
-    <string name="feedback_notify_confirmation">Thank you for the feedback!</string>
-    <string name="feedback_label">Feedback</string>
-    <string name="feedback_action_reply_no">No</string>
-    <string name="feedback_action_reply_yes">Yes</string>
-
-    <!-- Destination reminder feedback Activity -->
-    <string name="feedback_msg">Were you notified at the right time to exit at your stop?</string>
-    <string name="feedback_freeText">Write your feedback</string>
-    <string name="feedback_checkbox_text">Include system log (your choice will be saved for future trips)</string>
-    <string name="feedback_like_button_description">Yes, I was notified at the right time</string>
-    <string name="feedback_dislike_button_description">No, I was not notified at the right time</string>
-    <string name="feedback_log_guide">Your feedback will be sent to OneBusAway. If you check \"Include system logs\"
-        , real-time location information from your device recorded as you
-        approached your destination stop will be shared with OneBusAway so developers can improve
-        the destination reminder feature.\n\nChange your preference for sharing system logs in Settings.</string>
-
-    <!-- Destination reminder feedback Preferences -->
-    <string name="preferences_category_user_logs">Share debugging information</string>
-    <string name="preferences_user_share_destination_logs_title">Include destination reminder logs</string>
-    <string name="preferences_user_share_destination_logs_summary">Anonymous real-time location information from
-        your device will be shared with OneBusAway to improve the destination reminder feature.</string>
-
-    <!-- Destination reminder change location accuracy -->
-    <string name="main_changelocationmode_title">High accuracy location not enabled</string>
-    <string name="main_changelocationmode">Your current device "Location method" setting may fail to
-        notify you when approaching your destination due to inaccurate position information.
-        Would you like to change your device "Location method" to "High accuracy" now?
-    </string>
-
     <!-- Stop Details -->
     <string name="stop_details_code">Stop # %1$s</string>
 
@@ -372,9 +321,6 @@
     <string name="my_no_starred_stops">You have no starred stops.\n\nYou can add a star to a stop on
         the arrivals screen by tapping on the star next to the stop name.
     </string>
-    <string name="my_no_starred_routes">You have no starred routes.\n\nYou can add a star to a route
-        on the arrivals screen by tapping on the star next to the route number.
-    </string>
     <string name="my_no_recent_routes">You have no recent routes.</string>
     <!-- <string name="my_no_starred_routes">You have no starred routes.</string>-->
     <string name="route_favorite_options_title_star">Star Route \"%s\" for:</string>
@@ -395,18 +341,6 @@
     <string name="my_context_remove_star">Remove star</string>
     <string name="my_context_show_schedule">Show schedule</string>
 
-    <string name="my_option_clear_recent_stops_title">Delete Recent Stops?</string>
-    <string name="my_option_clear_recent_stops_confirm">This will permanently delete all recent stops.</string>
-
-    <string name="my_option_clear_recent_routes_title">Delete Recent Routes?</string>
-    <string name="my_option_clear_recent_routes_confirm">This will permanently delete all recent routes.</string>
-
-    <string name="my_option_clear_starred_stops_title">Remove All Starred Stops?</string>
-    <string name="my_option_clear_starred_stops_confirm">This will permanently remove all starred stops.</string>
-
-    <string name="my_option_clear_starred_routes_title">Remove All Starred Routes?</string>
-    <string name="my_option_clear_starred_routes_confirm">This will permanently remove all starred routes.</string>
-
     <!-- Service Alerts  -->
     <string name="alert_content_description_warning">Service alert warning - tap to slide up panel
         and reveal more info.
@@ -416,10 +350,8 @@
     </string>
     <string name="situation_more_details">More details</string>
     <string name="hide">Hide</string>
-    <string name="hide_all">Hide all</string>
     <string name="close">Close</string>
     <string name="alert_hidden_snackbar_text">Alert is now hidden</string>
-    <string name="all_alert_hidden_snackbar_text">All alerts are now hidden</string>
     <string name="alert_hidden_snackbar_action">UNDO</string>
     <plurals name="alert_filter_text">
         <item quantity="one">%1$d active alert is hidden</item>
@@ -471,32 +403,25 @@
     <string name="trip_info_option_showroute">Show Route</string>
     <string name="trip_info_option_showstop">Show Stop</string>
     <string name="trip_info_separator">-</string>
-    <string name="trip_info_grant_exact_alarms_permission_title">Permission Needed</string>
-    <string name="trip_info_grant_exact_alarms_permission_message">You must grant the app permission to schedule a reminder.</string>
-    <string name="trip_info_grant_exact_alarms_permission_positive_button">Grant Permission</string>
-    <string name="trip_info_grant_exact_alarms_permission_negative_button">Cancel</string>
 
     <!-- Occupancy -->
     <string name="historically_full">Historically full</string>
     <string name="historically_standing_room">Historically standing room</string>
-    <string name="historically_many_seats_available">Historically many seats available</string>
-    <string name="historically_few_seats_available">Historically few seats available</string>
+    <string name="historically_seats_available">Historically seats available</string>
     <string name="historically_empty">Historically empty</string>
     <string name="menu_title_about_historical_occupancy">About historical occupancy</string>
     <string name="menu_title_about_occupancy">About occupancy</string>
-    <string name="menu_text_about_historical_occupancy">Historical occupancy (faded icon) is an average of trip ridership at this stop over the last 6 months.</string>
-    <string name="menu_text_about_realtime_occupancy">Real-time occupancy is shown as one or two person icons when there are many seats available or few seats available, and is shown as three person icons when the vehicle is full.</string>
+    <string name="menu_text_about_historical_occupancy">Historical occupancy (gray icon) is an average of trip ridership at this stop over the last 6 months.</string>
+    <string name="menu_text_about_occupancy">Real-time occupancy is shown using green coloring when there are many seats available or standing room available, and is shown in red coloring when the vehicle is full.  Historical occupancy (gray icon) is an average of trip ridership at this stop over the last 6 months.</string>
 
     <string name="realtime_full">Full</string>
     <string name="realtime_standing_room">Standing room</string>
-    <string name="realtime_many_seats_available">Many seats available</string>
-    <string name="realtime_few_seats_available">Few seats available</string>
+    <string name="realtime_seats_available">Seats available</string>
     <string name="realtime_empty">Empty</string>
 
     <string name="predicted_full">Predicted full</string>
     <string name="predicted_standing_room">Predicted standing room</string>
-    <string name="predicted_many_seats_available">Predicted many seats available</string>
-    <string name="predicted_few_seats_available">Predicted few seats available</string>
+    <string name="predicted_seats_available">Predicted seats available</string>
     <string name="predicted_empty">Predicted empty</string>
 
 
@@ -523,6 +448,10 @@
     <string name="foreground_action_poll_text">Checking predictions for your reminders&#8230;</string>
     <string name="foreground_action_notify_text">Triggering a notification for your reminder&#8230;</string>
     <string name="foreground_action_cancel_text">Dismissing your reminder&#8230;</string>
+
+    <!-- Embedded Social -->
+    <string name="social">Social</string>
+    <string name="join_discussion">Join discussion</string>
 
     <!-- Report problem -->
     <string name="report_problem_comment_hint">Problem description (optional)</string>
@@ -627,6 +556,7 @@
     <string name="preferences_category_display">Display</string>
     <string name="preferences_category_backup">Backup</string>
     <string name="preferences_category_notifications">Notifications</string>
+    <string name="preferences_category_social">Social</string>
     <string name="preferences_category_advanced">Advanced</string>
     <string name="preferences_screen_advanced_summary">Dig deeper into the nuts and bolts</string>
     <string name="preferences_category_about">About</string>
@@ -642,20 +572,9 @@
     <string name="preferences_preferred_units_option_metric">Metric (km, m)</string>
     <string name="preferences_preferred_units_option_imperial">Imperial (mi, ft)</string>
 
-    <string name="preferences_app_theme_title">App Theme</string>
-    <string name="preferences_app_theme_option_system_default">System Default</string>
-    <string name="preferences_app_theme_option_light">Light Theme</string>
-    <string name="preferences_app_theme_option_dark">Dark Theme</string>
-
     <string name="preferences_show_negative_arrivals_title">Show departed buses</string>
     <string name="preferences_show_negative_arrivals_summary">Include buses that just left as
         negative arrival times
-    </string>
-
-    <string name="preferences_hide_alerts_title">Hide all alerts</string>
-    <string name="preferences_hide_alerts_summary">When selected, by default all service alerts will
-        be collapsed into a small bar at the top of the arrivals screen instead of shown as a full
-        list.
     </string>
 
     <string name="preferences_show_zoom_controls_title">Show zoom controls</string>
@@ -697,9 +616,10 @@
     <string name="preferences_save_title">Save to storage</string>
     <string name="preferences_save_summary">Saves your starred and recent stops and routes</string>
     <string name="preferences_restore_title">Restore from storage</string>
-    <string name="preferences_restore_summary">Restores from a previous backup. After selecting this option, you\'ll be asked to pick a file. Please select the backup file (e.g., "db.backup" or "OneBusAway.backup"), which may be in your "Documents" folder or any location where you saved the backup.
-</string>
-
+    <string name="preferences_restore_summary">Restores from previous save</string>
+    <string name="preferences_screen_social_title">Embedded Social</string>
+    <string name="preferences_screen_social_summary_signed_in">Sign out, privacy policy, terms and conditions, linked accounts, delete account</string>
+    <string name="preferences_screen_social_summary_signed_out">Sign in, privacy policy, terms and conditions</string>
     <string name="preferences_db_saved">Saved successfully!</string>
     <string name="preferences_db_save_error">Unable to save: %1$s</string>
     <string name="preferences_db_restore_warning">This will wipe out any existing data! Go ahead?
@@ -719,8 +639,6 @@
     </string>
     <string name="preferences_analytics_title">Send anonymous usage data</string>
     <string name="preferences_analytics_summary">Help us improve the app</string>
-    <string name="preferences_travel_behavior_title">Send anonymous travel behavior data</string>
-    <string name="preferences_travel_behavior_summary">Help us improve public transit</string>
     <string name="preferences_tutorial_title">Show tutorial</string>
     <string name="preferences_tutorial_summary">Show instructions for using this app</string>
     <string name="preferences_donate_title">Donate</string>
@@ -728,25 +646,6 @@
     <string name="preferences_powered_by_oba_title">Powered by OneBusAway</string>
     <string name="preferences_powered_by_oba_summary">Find out more about the open-source project
     </string>
-
-    <string name="preferences_push_firebase_data_title">Push Firebase data to server</string>
-    <string name="preferences_push_firebase_data_summary">If you\'ve opted into a travel behavior study, tapping this option will trigger a push of collected travel behavior data to the Firebase server. This is useful while testing the app and is intended for use by developers. For best results make sure you have a strong Internet connection first.</string>
-
-    <string name="push_firebase_data_dialog_title">Pushing Firebase data…</string>
-    <string name="push_firebase_data_dialog_summary">Waiting until all currently pending writes for the active user have been acknowledged by the backend…</string>
-
-    <string name="push_firebase_data_dialog_user_not_enrolled_title">User not enrolled</string>
-    <string name="push_firebase_data_dialog_user_not_enrolled_summary">Push to Firebase was not attempted as user is not enrolled in travel behavior data collection. You can enroll by enabling the Setting for \"Send anonymous travel behavior data\".</string>
-
-    <string name="push_firebase_data_dialog_success_title">Push successful</string>
-    <string name="push_firebase_data_dialog_success_summary">All currently pending writes for the active user have been acknowledged by the Firebase backend.</string>
-
-    <string name="push_firebase_data_dialog_failed_title">Push failed</string>
-    <string name="push_firebase_data_dialog_failed_summary">Something went wrong. Please make sure you have a strong Internet connection and try again.</string>
-
-    <string name="push_firebase_data_dialog_canceled_title">Push canceled</string>
-    <string name="push_firebase_data_dialog_canceled_summary">Something went wrong. Please make sure you have a strong Internet connection and try again.</string>
-
     <string name="preferences_about_title">About</string>
     <string name="preferences_about_summary">Version, contributor, and license information</string>
     <!-- Units -->
@@ -807,11 +706,13 @@
     <string name="rt_stop_problem_title">Stop Problem</string>
     <string name="rt_arrival_problem_title">Arrival Time Problem</string>
     <string name="rt_app_feedback">Send App Feedback</string>
+    <string name="rt_ideas">Ideas For New Features</string>
     <string name="rt_message_infrastructure_problem">Missing route, broken bench, etc.</string>
     <string name="rt_message_customer_service">Driver compliments and complaints, lost &amp; found, etc.</string>
     <string name="rt_message_stop_problem">Missing route, wrong stop name, etc.</string>
     <string name="rt_message_arrival_problem">Vehicle never came, wrong arrival time, etc.</string>
     <string name="rt_message_app_feedback">Design, bugs, etc.</string>
+    <string name="rt_message_ideas">Submit and vote on future improvements</string>
     <string name="rt_address_hint">Address of problem (optional)</string>
     <string name="rt_yes">YES</string>
     <string name="rt_no">NO</string>
@@ -833,7 +734,6 @@
     </string>
     <string name="trip_details_current_stop">Current stop</string>
     <string name="trip_details_current_bus_position">Bus is currently at</string>
-    <string name="trip_details_dest_stop">Destination stop</string>
 
     <!-- Vehicles on Map -->
     <string name="vehicle_last_updated_sec">Data updated %1$d sec ago</string>
@@ -844,14 +744,11 @@
     <string name="night_light_dialog_title">Never miss the bus at night again!</string>
     <string name="night_light_dialog_message">Tired of watching your bus fly by because the driver
         couldn\'t see you in the dark? Hold up your flashing Night Light and make yourself visible!
-        \n\nWARNING: This feature may potentially trigger seizures for people with photosensitive epilepsy. User discretion is advised.
     </string>
     <string name="night_light_create_shortcut">Create shortcut</string>
-    <string name="night_light_start">Start</string>
-    <string name="night_light_cancel">Cancel</string>
 
     <!-- Tutorials -->
-    <string name="tutorial_button_text">Got it!</string>
+    <string name="tutorial_button_text" >Got it!</string>
     <string name="tutorial_welcome_title">Welcome to OneBusAway!</string>
     <string name="tutorial_welcome_text">Tap on a stop (green dot on the map) to see arrival
         times.
@@ -865,8 +762,7 @@
     </string>
     <string name="tutorial_arrival_header_arrival_info_text">This long! Colored background tells you
         if the bus is early (red) or late (blue). On time = green background. If we don\'t know
-        where the bus is, the scheduled time is shown (gray background). Gray with strikethrough text
-        (a line through it) means the trip is canceled.
+        where the bus is, the scheduled time is shown (gray background).
     </string>
     <string name="tutorial_arrival_header_sliding_panel_title">Slide up to show more arrivals
     </string>
@@ -897,105 +793,67 @@
     <string name="tutorial_send_feedback_transit_service_text">You can report a variety of issue
         types to your local government near this stop. Tap on the drop-down box to see a full list.
     </string>
-    <string name="tutorial_trip_plan_geocoder_title">Enter the address or location name</string>
-    <string name="tutorial_trip_plan_geocoder_text">You can use addresses or location names for origins and destinations when planning a trip. Stop IDs and cross streets are not currently supported in trip plans.
-    </string>
 
     <!-- Permissions -->
-    <string name="location_permissions_title">Location permissions</string>
-    <string name="location_permissions_message">To enhance your experience, enable location use to:\n- Display your real-time position on the map.\n- Automatically set your local transit agency.\n\nYour location data is not collected by us. Alternatively, you may manually select your region without enabling location permissions.</string>
+    <string name="location_permissions_title">Real-time location needs permission</string>
+    <string name="location_permissions_message">To show your real-time position on the map
+        you\'ll need to grant location permissions. If you select \"Never ask again\" you will need
+        to reinstall the app or enable permissions via system settings to see your real-time location.
+    </string>
     <string name="no_thanks">No thanks</string>
 
     <string name="storage_permissions_title">Access to device storage is required</string>
     <string name="storage_permissions_message">To backup or restore your data, OneBusAway needs permission to access your local device storage.</string>
 
     <!-- About -->
-    <string name="application_version">Version</string>
     <string name="title_activity_about">About</string>
-    <string name="about_content"><![CDATA[
-    <html>
-  <body>
-    <h1 style="color: #4caf50"><b>Welcome to OneBusAway!</b></h1>
+    <string name="about_text">
+        "Find out more about the OneBusAway open-source project at http://onebusaway.org.\n\n"
 
-    <p>
-        OneBusAway is made by a team of volunteers and relies upon
-        the dedication, passion, and talents of its open source contributors.
-    </p>
-    <h2><b>Code Contributors:</b></h2>
-    <p>
-      Our dedicated contributors improve the app\'s functionality and user
-      experience:
-    </p>
+        "*** Code ***\n\n"
 
-    <ul>
-      <li><b>Paul Watts</b></li>
-      <li><b>Brian Ferris</b></li>
-      <li><b>Daniel Welsh</b></li>
-      <li><b>Arno Hart</b></li>
-      <li><b>Sean Barbeau</b></li>
-      <li><b>York Region Transit</b></li>
-      <li><b>Ben Du</b></li>
-      <li><b>Cagri Cetin</b></li>
-      <li><b>Mike Karabushin</b></li>
-      <li><b>Aziz Batihk</b></li>
-      <li><b>Charles Bond</b></li>
-      <li>
-        <b
-          >Hillsborough Area Regional Transit (via Simon Jacobs at Cambridge
-          Systematics)</b
-        >
-      </li>
-      <li><b>Bridgette Eichelberger</b></li>
-      <li><b>Rodrigo Carvalho (Google Summer of Code 2017)</b></li>
-      <li><b>Steve Moritani</b></li>
-      <li><b>Ellen Conley</b></li>
-    </ul>
-    <h2><b>Translations:</b></h2>
-    <p>
-      Thanks to our translators, OneBusAway is
-      accessible worldwide:
-    </p>
-    <ul>
-      <li><b>Ari Rusakko</b></li>
-      <li><b>Eleonora Fabbri</b></li>
-      <li><b>Edgar Andrés Moncada Taborda</b></li>
-    </ul>
-    <h2><b>Image Credits:</b></h2>
-    <p>
-      Thanks to the designers who created images used
-      in the vehicle icons, which were uploaded to the Noun Project under CC BY
-      3.0 (https://creativecommons.org/licenses/by/3.0/us/):
-    </p>
-    <ul>
-      <li>Arrow by <b>Zlatko Najdenovski</b>, MK</li>
-      <li>Map Marker by <b>Housin Aziz</b>, SE</li>
-      <li>Incognito by <b>Christopher Schreiner</b></li>
-      <li>Flag Triangle by <b>Austin Andrews</b></li>
-    </ul>
-    <h2>
-      <b>Join the Journey: Contribute to Our App!</b>
-      </h2>
-    <p>
-      Check out our project on GitHub at https://github.com/OneBusAway/onebusaway-android.
-      <p>
-        Find out more about the OneBusAway open-source project at https://onebusaway.org .</p>
-        <p>
-        Special thanks to Google for the visually stunning material design icons(https://github.com/google/material-design-icons),
-        which add a touch of elegance to our app. Their generosity in licensing
-        these icons under Apache v2.0(https://www.apache.org/licenses/LICENSE-2.0) has greatly enriched our user experience.
-      </p>
-        <p>
-        Special thanks to amcharts for free SVG weather icons(https://www.amcharts.com/free-animated-svg-weather-icons/),
-        these icons under Creative Commons Attribution 4.0 (https://creativecommons.org/licenses/by/4.0/).
-      </p>
-      <p>
+        "We'd like to thank the following who have contributed code to OneBusAway Android:\n\n"
 
-    <p>
-      Explore our app and embark on a seamless transit journey with OneBusAway!
-    </p>
-  </body>
-</html>
-  ]]></string>
+        "* Paul Watts\n"
+        "* Brian Ferris\n"
+        "* Daniel Welsh\n"
+        "* Arno Hart\n"
+        "* Sean Barbeau\n"
+        "* York Region Transit\n"
+        "* Ben Du\n"
+        "* Cagri Cetin\n"
+        "* Mike Karabushin\n"
+        "* Aziz Batihk\n"
+        "* Charles Bond\n"
+        "* Hillsborough Area Regional Transit (via Simon Jacobs at Cambridge Systematics)\n"
+        "* Bridgette Eichelberger\n"
+        "* Rodrigo Carvalho (Google Summer of Code 2017)\n"
+        "* Steve Moritani\n\n"
+
+        "Want to contribute to this app? Check it out on Github at
+        https://github.com/OneBusAway/onebusaway-android.\n\n"
+
+        "*** Translations ***\n\n"
+
+        "We'd like to thank those who have contributed translations to OneBusAway Android:\n\n"
+
+        "* Ari Rusakko\n"
+        "* Edgar Andrés Moncada Taborda\n\n"
+
+        "*** Images ***\n\n"
+
+        "Thanks to the designers who created images used in the vehicle icons, which were uploaded "
+        "to the Noun Project under CC BY 3.0 (http://creativecommons.org/licenses/by/3.0/us/):\n\n"
+
+        "* Arrow by Zlatko Najdenovski, MK\n"
+        "* Map Marker by Housin Aziz, SE\n"
+        "* Incognito by Christopher Schreiner\n"
+        "* Flag Triangle by Austin Andrews\n\n"
+
+        "Thanks to Google for the material design icons
+        (https://github.com/google/material-design-icons), "
+        "licensed under Apache v2.0 (https://www.apache.org/licenses/LICENSE-2.0).\n\n"
+    </string>
 
     <!-- Trip Planner strings -->
 
@@ -1005,14 +863,8 @@
     <string name="trip_plan_leaving">Leaving</string>
     <string name="trip_plan_arriving">Arriving</string>
     <string name="trip_plan_stop_connector">at</string>
-    <string name="trip_plan_departure_status">Status</string>
-    <string name="trip_plan_date">Date</string>
-    <string name="trip_plan_time">Time</string>
 
-    <string name="trip_plan_start_location_hint">Starting address or location name</string>
-    <string name="trip_plan_end_location_hint">Ending address or location name</string>
-    <string name="select_origin_from_contacts">Select origin from contacts</string>
-    <string name="select_destination_from_contacts">Select destination from contacts</string>
+    <string name="trip_plan_location_hint">Enter address or location name</string>
 
     <string name="trip_plan_list_view">List View</string>
     <string name="trip_plan_map_view">Map View</string>
@@ -1048,12 +900,6 @@
 
     <string name="tripplanner_reverse">Reverse</string>
     <string name="tripplanner_report_trip_problem">Report Trip Plan Problem</string>
-
-    <string name="no_trip_planner_title">Google cost increase</string>
-    <string name="no_trip_planner_message">Google is now charging OneBusAway for all trip plans (about $1,000 per month)!
-        OBA is an open source project and can\’t pay for these costs. We\'ve created a non-profit and applied to Google for Nonprofits, but are still waiting for approval.
-        In the mean-time, we\'ve had to shut down the trip planner. If you\'d like to express your support for OneBusAway to Google for Nonprofits,
-        please reach out to them on Twitter at https://twitter.com/googlenonprofit?s=17!</string>
 
     <!-- Instructions generation -->
 
@@ -1225,105 +1071,12 @@
     <string name="bike_station_title">Tap to reserve a bike</string>
     <string name="floating_bike_title">Tap to reserve this bike</string>
 
-    <string name="application_ignoring_battery_opt_title">Performance Alert!</string>
-    <string name="application_ignoring_battery_opt_message">Battery optimizations are enabled for
-        this application which may decrease the performance of the application. To get the best experience
-        from this application, please go to settings and disable performance optimizations for OneBusAway.
-    </string>
-
-    <!--Travel Behaviour data collection-->
-    <string name="travel_behavior_opt_in_message">We\'d like your help with research to improve transit service.</string>
-    <string name="travel_behavior_opt_in_title">Help us improve transit!</string>
-    <string name="travel_behavior_age_message">Are you over the age of 18?</string>
-    <string name="travel_behavior_age_invalid_message">Thanks for your interest, but you need to be over the age of 18 to participate.</string>
-    <string name="travel_behavior_email_message">Please provide your email address for the online surveys</string>
-    <string name="travel_behavior_email_invalid">Please re-enter your email</string>
-    <string name="travel_behavior_enroll_success">You successfully enrolled in the study.</string>
-    <string name="travel_behavior_enroll_fail">Failed to enroll in the study. Please try again later.</string>
-    <string name="travel_behavior_email_hint">Email</string>
-    <string name="travel_behavior_confirm_email_hint">Confirm email</string>
-    <string name="travel_behavior_dialog_yes">Yes</string>
-    <string name="travel_behavior_dialog_no">No</string>
-    <string name="travel_behavior_dialog_learn_more">Learn more</string>
-    <string name="travel_behavior_dialog_not_now">Not now</string>
-    <string name="travel_behavior_dialog_consent_agree">Agree</string>
-    <string name="travel_behavior_dialog_consent_disagree">Decline</string>
-    <string name="travel_behavior_dialog_email_save">Save</string>
-    <string name="reset_time">Reset time</string>
-    <string name="set_destination_to_my_location">Set destination to my location</string>
-    <string name="set_origin_to_my_location">Set origin to my location</string>
-    <string name="travel_behavior_dialog_opt_out_title">Opt out of study?</string>
-    <string name="travel_behavior_dialog_opt_out_message">If you opt out of the research study, we won\'t receive any more information about your travel behavior to help improve public transit.</string>
-    <string name="cancel">Cancel</string>
-    <string name="my_option_clear_starred_routes">Remove all starred routes</string>
-    <string name="preferred_temperature_unit">Preferred temperature unit</string>
-    <string name="fahrenheit">Fahrenheit</string>
-    <string name="celsius">Celsius</string>
-    <string name="donation_view_title">🚨 OneBusAway needs your help</string>
-    <string name="donation_view_body">This app is currently built with 100% volunteer labor, and we need you to help us fund future development.</string>
-    <string name="donation_view_learn_more_button">Learn More</string>
-    <string name="donation_view_donate_now_button">Donate Now</string>
-    <string name="donation_dismiss_dialog_title">Please don\'t dismiss this request</string>
-    <string name="donation_dismiss_dialog_body">OneBusAway is a volunteer-run organization with almost no funding. We need your help to keep this app running.</string>
-    <string name="donation_dismiss_dialog_dont_want_to_help_button">I Don\'t Want to Help</string>
-    <string name="donation_dismiss_dialog_remind_me_later_button">Remind Me Later</string>
-    <string name="donation_dismiss_dialog_cancel_button">Cancel</string>
-    <string name="title_activity_donation_learn_more">Why we need your help</string>
-    <string name="donation_learn_more_explanation">We have big plans to improve OneBusAway, but we can\'t do it without your help. This app is currently built with 100% volunteer labor, and we need you to help us fund future development.\n\nAs a key project of the Open Transit Software Foundation, a 501(c)(3) non-profit, we rely on the goodwill of users like you to keep running and making this software better.\n\nEvery year, only a small fraction of our users donate, but every contribution, big or small, helps ensure that OneBusAway remains free, updated, and accessible to everyone. A small donation, even just the cost of one week of commuting, $27.50, can make all the difference.\n\nYour tax-deductible contribution ensures that OneBusAway remains free and accessible for everyone. Let\'s shape the future of transit together!\n\nThank you,\nThe OneBusAway Team</string>
-    <string name="preferences_reset_donation_timestamps_title">Reset Donation Timestamps</string>
-    <string name="preferences_reset_donation_timestamps_summary">Tapping this option will clear both the \'Remind Me Later\' and \'Don\'t Bother Me\' timestamps associated with donation requests.</string>
-    <string name="preferences_show_weather_view">Show weather view</string>
-    <string name="show">Show</string>
-    <string name="preferences_preferred_maps_title">Preferred Map Type</string>
-    <string name="preferences_preferred_map_option_normal2d">Default Map</string>
-    <string name="preferences_preferred_map_option_normal3d">Default Map with 3D Buildings</string>
-    <string name="preferences_preferred_map_option_satellite">Satellite Map</string>
-
-    <!-- Survey -->
-    <string name="preferences_show_available_studies_title">Show available studies</string>
-    <string name="preferences_show_available_studies_body">Join studies to help improve your transit and app experience.</string>
-    <string name="dismiss_survey">Dismiss survey</string>
-    <string name="onebusaway_survey">OneBusAway Survey</string>
-    <string name="you_can_select_multiple_options_for_this_pool">(You can select multiple options for this pool.)</string>
-    <string name="write_your_answer_here">Write your answer here</string>
-    <string name="submit">Submit</string>
-    <string name="go">GO!</string>
-    <string name="submitted_successfully">Submission Successful</string>
-    <string name="please_complete_required_questions">Please answer all required questions.</string>
-    <string name="sharing_survey_info_message">"This survey will share your "</string>
-    <string name="are_you_sure_you_want_to_dismiss_the_survey">Are you sure you want to dismiss this survey?</string>
-    <string name="dismiss_survey_dialog_title">Confirm Survey Dismissal</string>
-    <string name="remind_me_latter">Remind Me Later</string>
-    <string name="survey_dismiss_dialog_skip_this_survey">Skip This Survey</string>
-    <string name="dismiss_survey_dialog_body">Your feedback helps improve transit services and app experiences.</string>
-    <string name="preferences_show_weather_view_on_map">Display the weather view on the map</string>
-    <string name="failed_to_set_reminder">Failed to set reminder</string>
-    <string name="reminder_not_enabled">Reminder not enabled</string>
-    <string name="stop_added_to_favorites">Stop added to favorites</string>
-    <string name="stop_removed_from_favorites">Stop removed from favorites</string>
-    <string name="route_added_to_favorites">Route added to favorites</string>
-    <string name="route_removed_from_favorites">Route removed from favorites</string>
-    <string name="dismiss">Dismiss</string>
-    <string name="more_info">More Info</string>
-    <string name="display_test_alerts">Display test alerts</string>
-    <string name="display_test_wide_alerts_for_regions">Display test-wide alerts for regions</string>
-    <string name="do_you_want_to_plan_the_trip_now">Do you want to plan the trip now?</string>
-    <string name="plan_trip">Plan Trip?</string>
-    <string name="no_description_available">No description available</string>
-    <string name="close_donation_card">Close donation card</string>
-    <string name="send_email">Send email</string>
-    <string name="make_a_phone_call">Make a phone call</string>
-    <string name="browse_the_web">Browse the web</string>
-    <string name="map_option_zoom_out">Zoom out</string>
-    <string name="map_option_zoom_in">Zoom in</string>
-    <string name="map_option_layers_close">Close Map Layers Button</string>
-
-    <!-- Accessibility content descriptions for ETA rows -->
-    <string name="arrival_favorite_first_description">Save first route as favorite</string>
-    <string name="arrival_favorite_second_description">Save second route as favorite</string>
-    <string name="arrival_reminder_first_description">Set reminder for first arrival</string>
-    <string name="arrival_reminder_second_description">Set reminder for second arrival</string>
-    <string name="arrival_options_first_description">Options for first arrival</string>
-    <string name="arrival_options_second_description">Options for second arrival</string>
-    <string name="map_option_layers">Maps Layers Button</string>
+    <!-- Social -->
+    <string name="embedded_social_restriction">Enable social features</string>
+    <string name="es_missing_stop_conversation">Social discussion not yet available for this stop</string>
+    <string name="es_missing_route_conversation">Social discussion not yet available for this route</string>
+    <string name="es_msg_general_create_user_success">Created Embedded Social account</string>
+    <string name="es_msg_general_signin_success">Signed into Embedded Social</string>
+    <string name="es_msg_general_signout_success">Signed out of Embedded Social</string>
+    <string name="es_msg_general_account_deleted">Embedded Social account deleted</string>
 </resources>

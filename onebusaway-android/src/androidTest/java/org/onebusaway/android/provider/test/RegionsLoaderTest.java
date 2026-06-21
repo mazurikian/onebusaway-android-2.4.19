@@ -79,7 +79,7 @@ public class RegionsLoaderTest extends ObaLoaderTestCase {
                 0.3967700000000036);
         assertEquals("https://otp.prod.obahart.org/otp/", tampa.getOtpBaseUrl());
         assertEquals("otp-tampa@onebusaway.org", tampa.getOtpContactEmail());
-        assertEquals("co.bytemark.flamingo", tampa.getPaymentAndroidAppId());
+        assertEquals("co.bytemark.hart", tampa.getPaymentAndroidAppId());
         assertNull(tampa.getPaymentWarningTitle());
         assertNull(tampa.getPaymentWarningBody());
     }
@@ -108,7 +108,7 @@ public class RegionsLoaderTest extends ObaLoaderTestCase {
                 -122.4013255,
                 0.090694,
                 0.126793);
-        assertEquals("https://otp.prod.sound.obaweb.org/otp/routers/default/", ps.getOtpBaseUrl());
+        assertEquals("http://tpng.api.soundtransit.org/tripplanner/st/", ps.getOtpBaseUrl());
         assertEquals("co.bytemark.tgt", ps.getPaymentAndroidAppId());
         assertEquals("Check before you buy!", ps.getPaymentWarningTitle());
         assertEquals("The mobile fare payment app for Puget Sound does not support all transit service shown in OneBusAway. Please check that a ticket is eligible for your agency and route before you purchase!", ps.getPaymentWarningBody());

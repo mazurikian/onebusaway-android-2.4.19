@@ -15,13 +15,13 @@
  */
 package org.onebusaway.android.util;
 
+import org.onebusaway.android.BuildConfig;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
-
-import org.onebusaway.android.BuildConfig;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -81,14 +81,5 @@ public class TestUtils {
      */
     public static boolean isRunningOnEmulator() {
         return Build.FINGERPRINT.contains("generic");
-    }
-
-    /**
-     * Returns true if the test is running on CI, and false if it is not
-     *
-     * @return true if the test is running on CI, and false if it is not
-     */
-    public static boolean isRunningOnCI() {
-        return BuildConfig.CI != null && BuildConfig.CI.equals("true");
     }
 }

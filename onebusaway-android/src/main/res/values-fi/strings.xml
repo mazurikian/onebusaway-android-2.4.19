@@ -95,18 +95,15 @@
     <string name="map_option_search">Haku</string>
     <string name="main_help_title">Ohje</string>
     <string name="main_help_whatsnew_title">Mitä uutta?</string>
-    <string name="main_help_whatsnew">• <b>Virheenkorjaukset</b> Useita ohjelmistovirheiden korjauksia ja viimeistelyparannuksia. - Katso https://bit.ly/oba-android-releases</string>
+    <string name="main_help_whatsnew">&#8226;\u0020
+        <b>Uusi ulkoasu</b>
+        - Material design!\n&#8226;\u0020
+        <b>Reaaliaikaiset bussin liikkeet kartalla</b>
+        - Napsauta saapumisaikoja ja valitse\"Näytä reitti kartalla\"!\n&#8226;\u0020
+        <b>Reaaliaikaiset matkan tiedot</b>
+        - Napsauta saapumisaikoja ja valitse \"Näytä matkan tilanne\"!
+    </string>
     <string name="main_help_close">Sulje</string>
-    <string name="main_help_legend_title">Legenda</string>
-    <string name="main_help_legend_ontime">Vihreä tarkoittaa \"ajoissa\"</string>
-    <string name="main_help_legend_late">Sininen tarkoittaa \"Myöhässä\"</string>
-    <string name="main_help_legend_early">Punainen tarkoittaa \"juoksu aikaisin\"</string>
-    <string name="main_help_legend_scheduled">Harmaa tarkoittaa \"Suunniteltu saapuminen\" - Emme tiedä
-        missä bussi on nyt, mutta aikataulussa sanotaan, että saapuminen on tulossa
-    </string>
-    <string name="main_help_legend_canceled">Harmaa yliviivauksella tarkoittaa, että matka on ollut
-        peruttu - tämä bussi EI tule
-    </string>
     <string name="main_nolocation_title">Sijaintitieto ei ole käytettävissä</string>
     <string name="main_nolocation">OneBusAway haluaa käyttää sijaintitietoasi,
         sallitaanko?
@@ -120,7 +117,7 @@
 
     <string name="bus_options_menu_add_star">Lisää reitti suosikiksi</string>
     <string name="bus_options_menu_remove_star">Poista reitti suosikeista</string>
-    <string name="bus_options_menu_show_vehicles_on_map">Näytä ajoneuvot kartalla</string>
+    <string name="bus_options_menu_show_route_on_map">Näytä reitti kartalla</string>
     <string name="bus_options_menu_show_trip_details">Näytä matkan tilanne</string>
     <string name="bus_options_menu_set_reminder">Aseta muistutus</string>
     <string name="bus_options_menu_edit_reminder">Muokkaa tätä muistutusta</string>
@@ -194,14 +191,6 @@
         <item quantity="other">
             <xliff:g id="count">%d</xliff:g>
             min etuajassa
-        </item>
-    </plurals>
-    <plurals name="stop_info_car_count">
-        <item quantity="one">1 auton</item>
-        <!-- Entire element below should be on a single line if XML is reformatted - see #99 -->
-        <item quantity="other">
-            <xliff:g id="count">%d</xliff:g>
-            atuon
         </item>
     </plurals>
     <string name="stop_info_scheduled_arrival">Aikataulun mukainen saapuminen</string>
@@ -317,18 +306,6 @@
     <!-- <string name="my_option_clear_starred_routes">Poista kaikki suosikkireitit</string>-->
     <string name="my_option_clear_confirm">Tätä toimintoa ei voi peruuttaa! Suoritetaanko silti?</string>
     <string name="my_option_clear_confirm_title">Oletko aivan varma?</string>
-
-    <string name="my_option_clear_recent_stops_title">Poistetaanko viimeisimmät pysähdykset?</string>
-    <string name="my_option_clear_recent_stops_confirm">Tämä poistaa pysyvästi kaikki viimeisimmät pysähdykset.</string>
-
-    <string name="my_option_clear_recent_routes_title">Poistetaanko viimeisimmät reitit?</string>
-    <string name="my_option_clear_recent_routes_confirm">Tämä poistaa pysyvästi kaikki viimeaikaiset reitit.</string>
-
-    <string name="my_option_clear_starred_stops_title">Poistetaanko kaikki tähdellä merkityt pysäkit?</string>
-    <string name="my_option_clear_starred_stops_confirm">Tämä poistaa pysyvästi kaikki tähdellä merkityt pysäkit.</string>
-
-    <string name="my_option_clear_starred_routes_title">Poistetaanko kaikki tähdellä merkityt reitit?</string>
-    <string name="my_option_clear_starred_routes_confirm">Tämä poistaa pysyvästi kaikki tähdellä merkityt reitit.</string>
 
     <string name="my_context_get_stop_info">Näytä saapuvien vuorojen tiedot</string>
     <string name="my_context_get_route_info">Näytä reittitiedot</string>
@@ -577,7 +554,6 @@
     <string name="night_light_dialog_title">Älä myöhästy bussista enää öisin!</string>
     <string name="night_light_dialog_message">Kyllästyttääkö kun bussikuski ei huomaa sinua pimeässä
         ja ajaa ohitsesi? Näytä bussille vilkkuvaa Yövaloa ja tule huomatuksi!
-        \n\nVAROITUS: Tämä ominaisuus voi aiheuttaa kohtauksia ihmisille, joilla on valoherkkä epilepsia. Käyttäjän harkintaa suositellaan.
     </string>
     <string name="night_light_create_shortcut">Luo pikakuvake</string>
 
@@ -620,171 +596,45 @@
     </string>
 
     <!-- About -->
-    <string name="application_version">Versio</string>
-    <string name="about_content"><![CDATA[
-    <html>
-  <body>
-    <h1 style="color: #4caf50"><b>Tervetuloa OneBusAway-hankkeeseen!</b></h1>
-
-    <p>
-        Tämä sovellus on vapaaehtoistiimin tekemä ja se nojaa sen avoimen lähdekoodin avustajien omistautumiseen, intohimoon ja kykyihin.
-    </p>
-    <h2><b>Koodinkehittäjät:</b></h2>
-    <p>
-      Omistautuneet avustajamme parantavat sovelluksen toiminnallisuutta ja käyttäjäkokemusta:
-    </p>
-
-    <ul>
-      <li><b>Paul Watts</b></li>
-      <li><b>Brian Ferris</b></li>
-      <li><b>Daniel Welsh</b></li>
-      <li><b>Arno Hart</b></li>
-      <li><b>Sean Barbeau</b></li>
-      <li><b>York Region Transit</b></li>
-      <li><b>Ben Du</b></li>
-      <li><b>Cagri Cetin</b></li>
-      <li><b>Mike Karabushin</b></li>
-      <li><b>Aziz Batihk</b></li>
-      <li><b>Charles Bond</b></li>
-      <li>
-        <b
-          >Hillsborough Area Regional Transit (Simon Jacobsin välityksellä, Cambridge
-          Systematics)</b
-        >
-      </li>
-      <li><b>Bridgette Eichelberger</b></li>
-      <li><b>Rodrigo Carvalho (Google Summer of Code 2017)</b></li>
-      <li><b>Steve Moritani</b></li>
-      <li><b>Ellen Conley</b></li>
-    </ul>
-    <h2><b>Kääntäjät:</b></h2>
-    <p>
-      Kiitos kääntäjillemme, OneBusAway on saavutettavissa ympäri maailmaa:
-    </p>
-    <ul>
-      <li><b>Ari Rusakko</b></li>
-      <li><b>Eleonora Fabbri</b></li>
-      <li><b>Edgar Andrés Moncada Taborda</b></li>
-    </ul>
-    <h2><b>Kuvien tekijät:</b></h2>
-    <p>
-      Kiitos suunnittelijoille, jotka ovat luoneet kuvat, joita käytetään ajoneuvojen kuvakkeissa, ja jotka on ladattu Noun Projectiin CC BY -lisenssillä 3.0 (https://creativecommons.org/licenses/by/3.0/us/):
-    </p>
-    <ul>
-      <li>Nuoli, jonka on luonut <b>Zlatko Najdenovski</b>, MK</li>
-      <li>Karttamerkki, jonka on luonut <b>Housin Aziz</b>, SE</li>
-      <li>Incognito, jonka on luonut <b>Christopher Schreiner</b></li>
-      <li>Lipputriangeli, jonka on luonut <b>Austin Andrews</b></li>
-    </ul>
-    <h2>
-      <b>Lähde mukaan matkalle: Osallistu sovelluksemme kehittämiseen!</b>
-      </h2>
-    <p>
-      Tutustu projektiimme GitHubissa osoitteessa https://github.com/OneBusAway/onebusaway-android.
-      <p>
-        Lue lisää OneBusAwayn avoimen lähdekoodin projektista osoitteessa https://onebusaway.org .</p>
-        <p>
-        Erityiskiitos Googlen upeista materiaalisen suunnittelun ikoneista (https://github.com/google/material-design-icons),
-        jotka lisäävät eleganssia sovellukseemme. Heidän anteliaisuutensa lisensoida nämä ikonit Apache v2.0 -lisenssillä (https://www.apache.org/licenses/LICENSE-2.0) on rikastuttanut huomattavasti käyttäjäkokemustamme.
-      </p>
-      <p>
-    Erityiskiitos amchartsille ilmaisista SVG-sääkuvakkeista (https://www.amcharts.com/free-animated-svg-weather-icons/),
-    nämä kuvakkeet ovat Creative Commons Attribution 4.0 -lisenssin alaisia (https://creativecommons.org/licenses/by/4.0/).
-     </p>
-      <p>
-
-    <p>
-      Tutustu sovellukseemme ja aloita sujuva joukkoliikennematka OneBusAwayn kanssa!
-    </p>
-  </body>
-</html>
-
-    ]]></string>
-    <string name="location_permissions_message">Parantaaksesi kokemustasi, ota käyttöön sijainnin käyttö:\n  - Näytä reaaliaikainen sijaintisi kartalla.\n  - Aseta automaattisesti paikallinen liikennevirastosi.\n\nEmme kerää sijaintitietojasi. Vaihtoehtoisesti voit valita alueesi manuaalisesti ilman sijaintioikeuksien sallimista.</string>
     <string name="title_activity_about">Tietoja</string>
-    <string name="trip_info_grant_exact_alarms_permission_title">Lupa tarvitaan</string>
-    <string name="trip_info_grant_exact_alarms_permission_message">Sinun täytyy antaa sovellukselle lupa muistutuksen asettamiseen.</string>
-    <string name="trip_info_grant_exact_alarms_permission_positive_button">Myönnä lupa</string>
-    <string name="trip_info_grant_exact_alarms_permission_negative_button">Peruuta</string>
+    <string name="about_text">
+        "Lisätietoja tästä avoimen lähdekoodin projektista: http://onebusaway.org.\n\n"
 
-    <string name="preferred_temperature_unit">Suosittu lämpötilayksikkö</string>
-    <string name="fahrenheit">Fahrenheit</string>
-    <string name="celsius">Celsius</string>
-    <string name="donation_view_title">🚨 OneBusAway tarvitsee apuasi</string>
-    <string name="donation_view_body">Tämä sovellus on tällä hetkellä rakennettu 100% vapaaehtoistyöllä, ja tarvitsemme sinua auttamaan meitä rahoittamaan tulevaa kehitystä.</string>
-    <string name="donation_view_learn_more_button">Lue Lisää</string>
-    <string name="donation_view_donate_now_button">Lahjoita Nyt</string>
-    <string name="donation_dismiss_dialog_title">Ole hyvä äläkä hylkää tätä pyyntöä</string>
-    <string name="donation_dismiss_dialog_body">OneBusAway on vapaaehtoisten pyörittämä organisaatio, jolla on lähes ei lainkaan rahoitusta. Tarvitsemme apuasi pitääksemme tämän sovelluksen toiminnassa.</string>
-    <string name="donation_dismiss_dialog_dont_want_to_help_button">En Halua Auttaa</string>
-    <string name="donation_dismiss_dialog_remind_me_later_button">Muistuta Minua Myöhemmin</string>
-    <string name="donation_dismiss_dialog_cancel_button">Peruuta</string>
-    <string name="title_activity_donation_learn_more">Miksi tarvitsemme apuasi</string>
-    <string name="donation_learn_more_explanation">Meillä on suuria suunnitelmia OneBusAwayn parantamiseksi, mutta emme voi tehdä sitä ilman apuasi. Tämä sovellus on tällä hetkellä rakennettu 100% vapaaehtoistyöllä, ja tarvitsemme sinua auttamaan meitä rahoittamaan tulevan kehityksen.\n\nOpen Transit Software Foundationin, 501(c)(3) voittoa tavoittelemattoman järjestön, keskeisenä hankkeena me luotamme käyttäjien, kuten sinun, hyväntahtoisuuteen pysyäksemme toiminnassa ja tehdäksemme tästä ohjelmistosta paremman.\n\nJoka vuosi vain pieni osa käyttäjistämme lahjoittaa, mutta jokainen panos, suuri tai pieni, auttaa varmistamaan, että OneBusAway pysyy ilmaisena, päivitettynä ja kaikkien saavutettavissa. Pieni lahjoitus, vaikkapa vain yhden viikon työmatkakustannusten verran, 27,50 dollaria, voi tehdä suuren eron.\n\nVerovähennyskelpoinen panoksesi varmistaa, että OneBusAway pysyy vapaana ja kaikkien saavutettavissa. Muovataan yhdessä joukkoliikenteen tulevaisuutta!\n\nKiitos,\nOneBusAway-tiimi</string>
-    <string name="preferences_reset_donation_timestamps_title">Nollaa Lahjoituksen Aikaleimat</string>
-    <string name="preferences_reset_donation_timestamps_summary">Tämän vaihtoehdon napauttaminen poistaa sekä \'Muistuta minua myöhemmin\' että \'Älä vaivaudu\' aikaleimat, jotka liittyvät lahjoituspyyntöihin.</string>
-    <string name="preferences_show_weather_view">Näytä säätönäkymä</string>
-    <string name="show">Näytä</string>
-    <string name="preferences_preferred_maps_title">Ensisijainen Karttatyyppi</string>
-    <string name="preferences_preferred_map_option_normal2d">Oletuskartta</string>
-    <string name="preferences_preferred_map_option_normal3d">Oletuskartta 3D-rakennuksilla</string>
-    <string name="preferences_preferred_map_option_satellite">Satelliitti kartta</string>
+        "*** Ohjelmakoodi ***\n\n"
 
-    <!-- Survey -->
-    <string name="preferences_show_available_studies_title">Näytä saatavilla olevat tutkimukset</string>
-    <string name="preferences_show_available_studies_body">Osallistu tutkimuksiin auttaaksesi parantamaan liikenne- ja sovelluskokemustasi.</string>
-    <string name="dismiss_survey">Hylkää kysely</string>
-    <string name="onebusaway_survey">OneBusAway-kysely</string>
-    <string name="you_can_select_multiple_options_for_this_pool">(Voit valita useita vaihtoehtoja tästä ryhmästä.)</string>
-    <string name="write_your_answer_here">Kirjoita vastauksesi tähän</string>
-    <string name="submit">Lähetä</string>
-    <string name="go">MENE!</string>
-    <string name="submitted_successfully">Lähetys onnistui</string>
-    <string name="please_complete_required_questions">Ole hyvä ja vastaa kaikkiin pakollisiin kysymyksiin.</string>
-    <string name="sharing_survey_info_message">Tämä kysely jakaa tietosi</string>
-    <string name="are_you_sure_you_want_to_dismiss_the_survey">Oletko varma, että haluat hylätä tämän kyselyn?</string>
-    <string name="dismiss_survey_dialog_title">Vahvista kyselyn hylkääminen</string>
-    <string name="remind_me_latter">Muistuta myöhemmin</string>
-    <string name="survey_dismiss_dialog_skip_this_survey">Ohita tämä kysely</string>
-    <string name="dismiss_survey_dialog_body">Palautteesi auttaa parantamaan liikennepalveluja ja sovelluskokemuksia.</string>
-    <string name="preferences_show_weather_view_on_map">Näytä säätiedot kartalla</string>
-    <string name="failed_to_set_reminder">Muistutuksen asettaminen epäonnistui</string>
-    <string name="reminder_not_enabled">Muistutus ei ole käytössä</string>
-    <string name="stop_added_to_favorites">Pysäkki lisätty suosikkeihin</string>
-    <string name="stop_removed_from_favorites">Pysäkki poistettu suosikeista</string>
-    <string name="route_added_to_favorites">Reitti lisätty suosikkeihin</string>
-    <string name="route_removed_from_favorites">Reitti poistettu suosikeista</string>
-    <string name="dismiss">Hylkää</string>
-    <string name="more_info">Lisätietoja</string>
-    <string name="display_test_alerts">Näytä testihälytykset</string>
-    <string name="display_test_wide_alerts_for_regions">Näytä laajat testihälytykset alueille</string>
-    <string name="no_description_available">Kuvausta ei ole saatavilla</string>
-    <string name="close_donation_card">Sulje lahjoituskortti</string>
-    <string name="send_email">Lähetä sähköposti</string>
-    <string name="make_a_phone_call">Soita puhelu</string>
-    <string name="browse_the_web">Selaa verkkoa</string>
+        "Haluaisimme kiittää seuraavia henkilöitä, jotka ovat osallistuneet OneBusAway Androidin kehittämiseen:\n\n"
 
-    <!-- Trip Planner strings -->
-    <string name="trip_plan_departure_status">Tila</string>
-    <string name="trip_plan_date">Päivämäärä</string>
-    <string name="trip_plan_time">Aika</string>
-    <string name="select_origin_from_contacts">Valitse alkuperä yhteystiedoista</string>
-    <string name="select_destination_from_contacts">Valitse kohde yhteystiedoista</string>
-    <string name="map_option_zoom_out">Loitontaa</string>
-    <string name="map_option_zoom_in">Lähentää</string>
-    <string name="map_option_layers_close">Sulje karttatasojen painike</string>
+        "* Paul Watts\n"
+        "* Brian Ferris\n"
+        "* Daniel Welsh\n"
+        "* Arno Hart\n"
+        "* Sean Barbeau\n"
+        "* York Region Transit\n"
+        "* Ari Rusakko\n"
+        "* Ben Du\n"
+        "* Cagri Cetin\n"
+        "* Mike Karabushin\n\n"
 
-    <!-- Destination reminder feedback Activity -->
-    <string name="feedback_like_button_description">Kyllä, minulle ilmoitettiin oikeaan aikaan</string>
-    <string name="feedback_dislike_button_description">Ei, minulle ei ilmoitettu oikeaan aikaan</string>
+        "Haluaisitko osallistua sovelluksen kehittämiseen? Kurkkaa koodit Githubista
+        https://github.com/OneBusAway/onebusaway-android.\n\n"
 
-    <!-- Accessibility content descriptions for ETA rows -->
-    <string name="arrival_favorite_first_description">Tallenna ensimmäinen reitti suosikiksi</string>
-    <string name="arrival_favorite_second_description">Tallenna toinen reitti suosikiksi</string>
-    <string name="arrival_reminder_first_description">Aseta muistutus ensimmäisestä saapumisesta</string>
-    <string name="arrival_reminder_second_description">Aseta muistutus toiselle saapumiselle</string>
-    <string name="arrival_options_first_description">Vaihtoehdot ensimmäiselle saapumiselle</string>
-    <string name="arrival_options_second_description">Vaihtoehdot toiselle saapumiselle</string>
+        "*** Käännökset ***\n\n"
 
-    <string name="map_option_layers">Karttatasojen painike</string>
+        "Kiitokset henkilöille, jotka ovat tehneet käännökset OneBusAway Androidiin:\n\n"
+
+        "* Ari Rusakko\n"
+        "* Edgar Andrés Moncada Taborda\n\n"
+
+        "*** Kuvat ***\n\n"
+
+        "Kiitokset suunnittelijoille, jotka tekivät ajoneuvojen ikoneissa käytetyt kuvat, jotka "
+        "kuuluvat Noun Project under CC BY 3.0 (http://creativecommons.org/licenses/by/3.0/us/):\n\n"
+
+        "* Arrow by Zlatko Najdenovski, MK\n"
+        "* Map Marker by Housin Aziz, SE\n\n"
+
+        "Kiitokset Googlelle 'material design' ikoneista
+        (https://github.com/google/material-design-icons), "
+        "licensed under Apache v2.0 (https://www.apache.org/licenses/LICENSE-2.0).\n\n"
+    </string>
 </resources>

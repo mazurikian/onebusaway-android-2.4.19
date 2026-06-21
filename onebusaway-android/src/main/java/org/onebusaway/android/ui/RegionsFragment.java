@@ -15,6 +15,21 @@
  */
 package org.onebusaway.android.ui;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.firebase.analytics.FirebaseAnalytics;
+
+import org.onebusaway.android.R;
+import org.onebusaway.android.app.Application;
+import org.onebusaway.android.io.ObaAnalytics;
+import org.onebusaway.android.io.elements.ObaRegion;
+import org.onebusaway.android.region.ObaRegionsLoader;
+import org.onebusaway.android.util.ArrayAdapter;
+import org.onebusaway.android.util.LocationUtils;
+import org.onebusaway.android.util.PreferenceUtils;
+import org.onebusaway.android.util.RegionUtils;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -32,22 +47,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.firebase.analytics.FirebaseAnalytics;
-
-import org.onebusaway.android.R;
-import org.onebusaway.android.app.Application;
-import org.onebusaway.android.io.ObaAnalytics;
-import org.onebusaway.android.io.PlausibleAnalytics;
-import org.onebusaway.android.io.elements.ObaRegion;
-import org.onebusaway.android.region.ObaRegionsLoader;
-import org.onebusaway.android.util.ArrayAdapter;
-import org.onebusaway.android.util.LocationUtils;
-import org.onebusaway.android.util.PreferenceUtils;
-import org.onebusaway.android.util.RegionUtils;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -148,8 +147,6 @@ public class RegionsFragment extends ListFragment
         Log.d(TAG, "User manually set region to '" + region.getName() + "'.");
 
         ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                Application.get().getPlausibleInstance(),
-                PlausibleAnalytics.REPORT_REGION_EVENT_URL,
                 getString(R.string.region_selected_manually),
                 region.getName());
 

@@ -17,32 +17,27 @@
 
 package org.onebusaway.android.directions.util;
 
-import android.content.Context;
-import android.util.Log;
-import android.view.View;
-import android.widget.Filter;
-import android.widget.Filterable;
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import org.onebusaway.android.BuildConfig;
-import org.onebusaway.android.R;
 import org.onebusaway.android.io.elements.ObaRegion;
 import org.onebusaway.android.util.LocationUtils;
+
+import android.content.Context;
+import android.widget.ArrayAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlacesAutoCompleteAdapter extends org.onebusaway.android.util.ArrayAdapter<CustomAddress> implements Filterable {
+public class PlacesAutoCompleteAdapter extends ArrayAdapter<CustomAddress> implements Filterable {
 
     private Context mContext;
     private ObaRegion mRegion;
 
     private List<CustomAddress> mResultList = new ArrayList<CustomAddress>();
 
-    public PlacesAutoCompleteAdapter(Context context, int viewId,
+    public PlacesAutoCompleteAdapter(Context context, int textViewResourceId,
                                      ObaRegion region) {
-        super(context, viewId);
+        super(context, textViewResourceId);
         this.mContext = context;
         this.mRegion = region;
     }
@@ -68,15 +63,10 @@ public class PlacesAutoCompleteAdapter extends org.onebusaway.android.util.Array
             protected Filter.FilterResults performFiltering(CharSequence constraint) {
                 FilterResults filterResults = new FilterResults();
                 if (constraint != null) {
-                    // Retrieve the autocomplete results
-                    if (BuildConfig.USE_PELIAS_GEOCODING) {
-                        mResultList = LocationUtils.processPeliasGeocoding(mContext, mRegion, constraint.toString());
-                    } else {
-                        // Use Google Places SDK
-                        mResultList = LocationUtils.processGooglePlacesGeocoding(mContext, mRegion, constraint.toString());
-                    }
+                    // Retrieve the autocomplete results.
+                        mResultList = LocationUtils.processGeocoding(mContext, mRegion,
+                                constraint.toString());
                     if (mResultList != null){
-                        Log.d("Geocode", "Num of results: " + mResultList.size());
                         // Assign the data to the FilterResults
                         filterResults.values = mResultList;
                         filterResults.count = mResultList.size();
@@ -104,17 +94,4 @@ public class PlacesAutoCompleteAdapter extends org.onebusaway.android.util.Array
         this.mRegion = region;
     }
 
-    @Override
-    protected void initView(View view, CustomAddress address) {
-        TextView text = view.findViewById(R.id.geocode_text);
-        ImageView icon = view.findViewById(R.id.geocode_transit_icon);
-
-        text.setText(address.toString());
-
-        if (address.isTransitCategory()) {
-            icon.setVisibility(View.VISIBLE);
-        } else {
-            icon.setVisibility(View.GONE);
-        }
-    }
 }

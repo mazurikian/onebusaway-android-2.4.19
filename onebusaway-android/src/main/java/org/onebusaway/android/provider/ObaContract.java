@@ -24,18 +24,14 @@ import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
-import org.onebusaway.android.io.PlausibleAnalytics;
 import org.onebusaway.android.io.elements.ObaRegion;
 import org.onebusaway.android.io.elements.ObaRegionElement;
-import org.onebusaway.android.nav.model.PathLink;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.text.format.Time;
@@ -209,47 +205,12 @@ public final class ObaContract {
         public static final String REMINDER = "reminder";
 
         /**
-         * A String representing the ALARM_DELETE_PATH from the post request
-         * used for deleting an alarm.
+         * A bitmask representing the days the reminder should be used.
          * <P>
-         * Type: String
+         * Type: INTEGER
          * </P>
          */
-        public static final String ALARM_DELETE_PATH = "alarm_delete_path";
-
-        /**
-         * A String representing the ID of a trip.
-         * <p>
-         * Type: String
-         * </p>
-         */
-        public static final String TRIP_ID = "trip_id";
-
-        /**
-         * A String representing the service date for a particular trip.
-         * <p>
-         * Type: String
-         * </p>
-         */
-        public static final String SERVICE_DATE = "service_date";
-
-        /**
-         * A String representing the stop sequence number in the trip.
-         * <p>
-         * Type: String
-         * </p>
-         */
-        public static final String STOP_SEQUENCE = "stop_sequence";
-
-        /**
-         * A String representing the ID of a vehicle assigned to the trip.
-         * <p>
-         * Type: String
-         * </p>
-         */
-        public static final String VEHICLE_ID = "vehicle_id";
-
-
+        public static final String DAYS = "days";
     }
 
     protected interface TripAlertsColumns {
@@ -367,22 +328,6 @@ public final class ObaContract {
          * </P>
          */
         public static final String OBA_BASE_URL = "oba_base_url";
-
-        /**
-         * The Sidecar Base URL for the API.
-         * <P>
-         * Type: TEXT
-         * </P>
-         */
-        public static final String SIDECAR_BASE_URL = "sidecar_base_url";
-
-        /**
-         * The plausible analytics server URL for the region.
-         * <P>
-         * Type: TEXT
-         * </P>
-         */
-        public static final String PLAUSIBLE_ANALYTICS_SERVER_URL = "plausible_analytics_server_url";
 
         /**
          * The base SIRI URL.
@@ -511,10 +456,6 @@ public final class ObaContract {
          * </P>
          */
         public static final String PAYMENT_WARNING_BODY = "payment_warning_body";
-
-        public static final String TRAVEL_BEHAVIOR_DATA_COLLECTION = "travel_behavior_data_collection";
-
-        public static final String ENROLL_PARTICIPANTS_IN_STUDY = "enroll_participants_in_study";
     }
 
     protected interface RegionBoundsColumns {
@@ -618,66 +559,6 @@ public final class ObaContract {
         public static final String EXCLUDE = "exclude";
     }
 
-    protected interface NavigationColumns {
-
-        /**
-         * The Navigation ID for destination reminder
-         * <P>
-         * Type: INTEGER
-         * </P>
-         */
-        public static final String NAV_ID = "nav_id";
-
-        /**
-         * The start time for the navigation of this path link
-         * <P>
-         * Type: INTEGER
-         * </P>
-         */
-        public static final String START_TIME = "start_time";
-
-        /**
-         * The Trip Id
-         * <P>
-         * Type: TEXT
-         * </P>
-         */
-        public static final String TRIP_ID = "trip_id";
-
-        /**
-         * The Stop ID of the destination.
-         * <P>
-         * Type: TEXT
-         * </P>
-         */
-        public static final String DESTINATION_ID = "destination_id";
-
-        /**
-         * The Stop ID of the stop before the user's destination.
-         * <P>
-         * Type: TEXT
-         * </P>
-         */
-        public static final String BEFORE_ID = "before_id";
-
-        /**
-         * Sequence Number of the Segment.
-         * <P>
-         * Type: Integer
-         * </P>
-         */
-        public static final String SEQUENCE = "seq_num";
-
-        /**
-         * Whether this leg of the trip is still active.
-         * <P>
-         * Type: Integer (1 or 0)
-         * </P>
-         */
-        public static final String ACTIVE = "is_active";
-
-    }
-
     public static class Stops implements BaseColumns, StopsColumns, UserColumns {
 
         // Cannot be instantiated
@@ -732,29 +613,6 @@ public final class ObaContract {
             return result;
         }
 
-        public static boolean isFavorite(Context context, String stopId)
-        {
-            final String[] PROJECTION = {
-                    FAVORITE
-            };
-
-            ContentResolver cr = context.getContentResolver();
-            Cursor c = cr.query(CONTENT_URI, PROJECTION,_ID + "=?", new String[] {stopId}, null);
-            if (c != null) {
-                try {
-                    if (c.getCount() == 0) {
-                        return false;
-                    }
-                    c.moveToFirst();
-                    return c.getInt(0) == 1;
-
-                } finally {
-                    c.close();
-                }
-            }
-            return false;
-        }
-
         public static boolean markAsFavorite(Context context,
                 Uri uri,
                 boolean favorite) {
@@ -770,35 +628,6 @@ public final class ObaContract {
             values.put(ObaContract.Stops.USE_COUNT, 0);
             values.putNull(ObaContract.Stops.ACCESS_TIME);
             return cr.update(uri, values, null, null) > 0;
-        }
-
-        public static Location getLocation(Context context, String id) {
-            return getLocation(context.getContentResolver(), id);
-        }
-
-        private static Location getLocation(ContentResolver cr, String id) {
-            final String[] PROJECTION = {
-                    LATITUDE,
-                    LONGITUDE
-            };
-
-            Cursor c = cr.query(CONTENT_URI, PROJECTION,_ID + "=?", new String[] {id}, null);
-            if (c != null) {
-                try {
-                    if (c.getCount() == 0) {
-                        return null;
-                    }
-                    c.moveToFirst();
-                    Location l = new Location(LocationManager.GPS_PROVIDER);
-                    l.setLatitude(c.getDouble(0));
-                    l.setLongitude(c.getDouble(1));
-                    return l;
-
-                } finally {
-                    c.close();
-                }
-            }
-            return null;
         }
     }
 
@@ -858,7 +687,7 @@ public final class ObaContract {
             return result;
         }
 
-        public static boolean markAsFavorite(Context context,
+        protected static boolean markAsFavorite(Context context,
                 Uri uri,
                 boolean favorite) {
             ContentResolver cr = context.getContentResolver();
@@ -1268,15 +1097,6 @@ public final class ObaContract {
                 if (markAsRead) {
                     values.put(MARKED_READ_TIME, System.currentTimeMillis());
                 }
-                if (hidden == null) {
-                    // If the user has selected to hide all alerts by default, mark this one as hidden when inserting
-                    boolean hideAllAlerts = Application.getPrefs()
-                            .getBoolean(Application.get().getResources()
-                                    .getString(R.string.preference_key_hide_alerts), false);
-                    if (hideAllAlerts) {
-                        hidden = true;
-                    }
-                }
                 if (hidden != null) {
                     if (hidden) {
                         values.put(HIDDEN, 1);
@@ -1328,18 +1148,6 @@ public final class ObaContract {
             ContentResolver cr = Application.get().getContentResolver();
             ContentValues values = new ContentValues();
             values.put(HIDDEN, 0);
-            return cr.update(CONTENT_URI, values, null, null);
-        }
-
-        /**
-         * Marks all alerts as hidden, and therefore not visible
-         *
-         * @return the number of rows updated
-         */
-        public static int hideAllAlerts() {
-            ContentResolver cr = Application.get().getContentResolver();
-            ContentValues values = new ContentValues();
-            values.put(HIDDEN, 1);
             return cr.update(CONTENT_URI, values, null, null);
         }
     }
@@ -1419,11 +1227,7 @@ public final class ObaContract {
                     SUPPORTS_EMBEDDED_SOCIAL,
                     PAYMENT_ANDROID_APP_ID,
                     PAYMENT_WARNING_TITLE,
-                    PAYMENT_WARNING_BODY,
-                    TRAVEL_BEHAVIOR_DATA_COLLECTION,
-                    ENROLL_PARTICIPANTS_IN_STUDY,
-                    SIDECAR_BASE_URL,
-                    PLAUSIBLE_ANALYTICS_SERVER_URL
+                    PAYMENT_WARNING_BODY
             };
 
             Cursor c = cr.query(buildUri((int) id), PROJECTION, null, null, null);
@@ -1454,11 +1258,7 @@ public final class ObaContract {
                             c.getInt(15) > 0,            // Supports Embedded Social
                             c.getString(16),               // Payment Android App ID
                             c.getString(17),               // Payment Warning Title
-                            c.getString(18),               // Payment Warning Body
-                            c.getInt(19) > 0, // Travel behavior data collection
-                            c.getInt(20) > 0, // Enroll participants in travel behavior study
-                            c.getString(21), // Sidecar Base URL
-                            c.getString(22) // Plausible analytics server url
+                            c.getString(18)               // Payment Warning Body
                     );
                 } finally {
                     c.close();
@@ -1639,8 +1439,7 @@ public final class ObaContract {
          * all stops, then stopId should be null.
          *
          * @param routeId  routeId to be marked as favorite, in combination with headsign
-         * @param headsign headsign to be marked as favorite, in combination with routeId, or null
-         *                 if all headsigns should be marked for this routeId/stopId combo
+         * @param headsign headsign to be marked as favorite, in combination with routeId
          * @param stopId stopId to be marked as a favorite, or null if all stopIds should be marked
          *               for this routeId/headsign combo.
          * @param favorite true if this route and headsign combination should be marked as a
@@ -1651,11 +1450,8 @@ public final class ObaContract {
             if (context == null) {
                 return;
             }
-            final String WHERE;
             if (headsign == null) {
-                WHERE = ROUTE_ID + "=? AND " + STOP_ID + "=?";
-            } else {
-                WHERE = ROUTE_ID + "=? AND " + HEADSIGN + "=? AND " + STOP_ID + "=?";
+                headsign = "";
             }
 
             ContentResolver cr = context.getContentResolver();
@@ -1668,13 +1464,8 @@ public final class ObaContract {
                 stopIdInternal = ALL_STOPS;
             }
 
-            final String[] selectionArgs;
-            if (headsign == null) {
-                selectionArgs = new String[] {routeId, stopIdInternal};
-            } else {
-                selectionArgs = new String[] {routeId, headsign, stopIdInternal};
-            }
-
+            final String WHERE = ROUTE_ID + "=? AND " + HEADSIGN + "=? AND " + STOP_ID + "=?";
+            final String[] selectionArgs = {routeId, headsign, stopIdInternal};
             if (favorite) {
                 if (stopIdInternal != ALL_STOPS) {
                     // First, delete any potential exclusion records for this stop by removing all records
@@ -1697,15 +1488,8 @@ public final class ObaContract {
                 if (stopIdInternal == ALL_STOPS) {
                     // Also make sure we've deleted the single record for this specific stop, if it exists
                     // We don't have the stopId here, so we can just delete all records for this routeId/headsign
-                    final String[] selectionArgs2;
-                    final String WHERE2;
-                    if (headsign == null) {
-                        selectionArgs2 = new String[] {routeId};
-                        WHERE2 = ROUTE_ID + "=?";
-                    } else {
-                        selectionArgs2 = new String[] {routeId, headsign};
-                        WHERE2 = ROUTE_ID + "=? AND " + HEADSIGN + "=?";
-                    }
+                    final String[] selectionArgs2 = {routeId, headsign};
+                    final String WHERE2 = ROUTE_ID + "=? AND " + HEADSIGN + "=?";
                     cr.delete(CONTENT_URI, WHERE2, selectionArgs2);
                 }
 
@@ -1743,18 +1527,8 @@ public final class ObaContract {
                 analyticsParam.append("all stops");
             }
             ObaAnalytics.reportUiEvent(FirebaseAnalytics.getInstance(context),
-                    Application.get().getPlausibleInstance(),
-                    PlausibleAnalytics.REPORT_BOOKMARK_EVENT_URL,
                     analyticsEvent.toString(),
                     analyticsParam.toString());
-        }
-
-        /**
-         * Delete all saved route/headsign favorites at once.
-         */
-        public static void clearAllFavorites(Context context) {
-            ContentResolver cr = context.getContentResolver();
-            cr.delete(CONTENT_URI, null, null);
         }
 
         /**
@@ -1840,140 +1614,6 @@ public final class ObaContract {
                 c.close();
             }
             return favorite;
-        }
-    }
-
-
-    public static class NavStops implements BaseColumns, NavigationColumns {
-
-        // Cannot be instantiated
-        private NavStops() {
-        }
-
-        /** The URI path portion for this table */
-        public static final String PATH = "nav_stops";
-
-        /** The content:// style URI for this table */
-        public static final Uri CONTENT_URI = Uri.withAppendedPath(
-                AUTHORITY_URI, PATH);
-
-        public static final String CONTENT_DIR_TYPE
-                = "vnd.android.dir/" + BuildConfig.DATABASE_AUTHORITY + ".navstops";
-
-        public static Uri insert(Context context, Long startTime, Integer navId, Integer seqNum, String tripId, String destId, String beforeId) {
-            // TODO: Delete there since there's only one active trip.
-            ContentResolver cr = context.getContentResolver();
-            cr.delete(CONTENT_URI, null, null);
-            ContentValues values = new ContentValues();
-            values.put(NAV_ID, navId);
-            values.put(START_TIME, startTime);
-            values.put(TRIP_ID, tripId);
-            values.put(DESTINATION_ID, destId);
-            values.put(BEFORE_ID, beforeId);
-            values.put(SEQUENCE, seqNum);
-            values.put(ACTIVE, 1);
-            return cr.insert(CONTENT_URI, values);
-        }
-
-        /**
-         * Inserts multi-leg trip into database.
-         * @param context Context.
-         * @param startTime the startTime in milliseconds for this PathLink instance
-         * @param navId   Navigation ID for destination alert
-         * @param tripId  Trip ID of route.
-         * @param legs    Array of 2-string arrays, first element being stopId of second-to-last
-         *                stop and second element being stopid of destination stop of leg.
-         * @return
-         */
-        public static boolean insert(Context context, Long startTime, Integer navId, String tripId, String[][] legs)
-        {
-            ContentResolver cr = context.getContentResolver();
-            // TODO: Delete there since there's only one active trip atm.
-            cr.delete(CONTENT_URI, null, null);
-
-            // If inner array doesn't contain 2 values, can't insert.
-            if (legs.length > 1 && legs[0].length < 2) {
-                return false;
-            }
-
-            for (int i = 0; i < legs.length;i++) {
-                ContentValues values = new ContentValues();
-                values.put(NAV_ID, navId);
-                values.put(START_TIME, startTime);
-                values.put(TRIP_ID, tripId);
-                values.put(BEFORE_ID, legs[i][0]);
-                values.put(DESTINATION_ID, legs[i][1]);
-                values.put(SEQUENCE, i+1);
-                values.put(ACTIVE, 1);
-            }
-            return true;
-        }
-
-        public static boolean update(Context context, Uri uri, boolean active)
-        {
-            ContentResolver cr = context.getContentResolver();
-            ContentValues values = new ContentValues();
-            values.put(ACTIVE, active ? 1 : 0);
-            return cr.update(uri, values, null, null) > 0;
-        }
-
-        public static String[] getDetails(Context context, String id) {
-            final String[] PROJECTION = {
-                    TRIP_ID,
-                    DESTINATION_ID,
-                    BEFORE_ID
-            };
-
-            ContentResolver cr = context.getContentResolver();
-            Cursor c = cr.query(CONTENT_URI, PROJECTION, NAV_ID + "=?",new String[] { id }, null);
-            if (c != null) {
-                try {
-                    if (c.getCount() == 0) {
-                        return null;
-                    }
-                    c.moveToFirst();
-                    return new String[] { c.getString(0), c.getString(1), c.getString(2) };
-                } finally {
-                    c.close();
-                }
-            }
-            return null;
-        }
-
-        public static PathLink[] get(Context context, String navId)
-        {
-            final String[] PROJECTION = {
-                    TRIP_ID,
-                    DESTINATION_ID,
-                    BEFORE_ID,
-                    START_TIME
-            };
-            ContentResolver cr = context.getContentResolver();
-            Cursor c = cr.query(CONTENT_URI, PROJECTION, NAV_ID + "=?", new String[]{navId}, SEQUENCE + " ASC");
-            if (c != null) {
-                try {
-                    PathLink[] results = new PathLink[c.getCount()];
-                    if (c.getCount() == 0) {
-                        return results;
-                    }
-
-                    int i = 0;
-                    c.moveToFirst();
-                    do {
-                        results[i] = new PathLink(c.getLong(3),
-                                null, Stops.getLocation(context, c.getString(2)),
-                                Stops.getLocation(context, c.getString(1)),
-                                c.getString(0)
-                        );
-                        i++;
-                    } while (c.moveToNext());
-
-                    return results;
-                } finally {
-                    c.close();
-                }
-            }
-            return null;
         }
     }
 }

@@ -16,11 +16,6 @@
 
 package org.onebusaway.android.directions.util;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
-
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.directions.tasks.TripRequest;
@@ -29,6 +24,11 @@ import org.onebusaway.android.util.RegionUtils;
 import org.opentripplanner.api.ws.Request;
 import org.opentripplanner.routing.core.OptimizeType;
 import org.opentripplanner.routing.core.TraverseMode;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
@@ -142,15 +142,15 @@ public class TripRequestBuilder {
 
     public Double getMaxWalkDistance() {
         Double d = mBundle.getDouble(MAX_WALK_DISTANCE);
-        return (d != 0 && d != Double.MAX_VALUE) ? d : null;
+        return d != 0 ? d : null;
     }
 
     // Built in TraverseModeSet does not work properly so we cannot use request.setMode
     // This is built from examining dropdown on the OTP webapp
     // there are also airplane, bike, bike + ride, park + ride, kiss + ride, etc options
     // transit -> TRANSIT,WALK
-    // bus only -> BUS,WALK
-    // rail only -> RAIL,TRAM,WALK (TRAM is included to allow light rail)
+    // bus only -> BUSISH,WALK
+    // rail only -> TRAINISH,WALK
     public TripRequestBuilder setModeSetById(int id) {
         List<String> modes;
 
@@ -171,11 +171,10 @@ public class TripRequestBuilder {
                 }
                 break;
             case TripModes.BUS_ONLY:
-                modes = Arrays.asList(TraverseMode.BUS.toString(), TraverseMode.WALK.toString());
+                modes = Arrays.asList(TraverseMode.BUSISH.toString(), TraverseMode.WALK.toString());
                 break;
             case TripModes.RAIL_ONLY:
-                modes = Arrays.asList(TraverseMode.RAIL.toString(), TraverseMode.TRAM.toString(),
-                        TraverseMode.WALK.toString());
+                modes = Arrays.asList(TraverseMode.TRAINISH.toString(), TraverseMode.WALK.toString());
                 break;
             case TripModes.BIKESHARE:
                 modes = Arrays.asList(Application.get().getString(R.string.traverse_mode_bicycle_rent));
@@ -262,8 +261,8 @@ public class TripRequestBuilder {
             // URI.parse() doesn't tell us if the scheme is missing, so use URL() instead (#126)
             URL url = new URL(otpBaseUrl);
         } catch (MalformedURLException e) {
-            // Assume HTTPS scheme, since without a scheme the Uri won't parse the authority
-            otpBaseUrl = activity.getString(R.string.https_prefix) + otpBaseUrl;
+            // Assume HTTP scheme, since without a scheme the Uri won't parse the authority
+            otpBaseUrl = activity.getString(R.string.http_prefix) + otpBaseUrl;
         }
         String fmtOtpBaseUrl = otpBaseUrl != null ? RegionUtils.formatOtpBaseUrl(otpBaseUrl) : null;
 

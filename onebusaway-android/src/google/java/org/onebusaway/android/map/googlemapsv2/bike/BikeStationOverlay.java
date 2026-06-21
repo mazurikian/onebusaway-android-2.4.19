@@ -15,14 +15,6 @@
 */
 package org.onebusaway.android.map.googlemapsv2.bike;
 
-import android.app.Activity;
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
-
-import androidx.core.content.ContextCompat;
-
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -34,19 +26,27 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
-import org.onebusaway.android.io.PlausibleAnalytics;
 import org.onebusaway.android.map.googlemapsv2.BaseMapFragment;
 import org.onebusaway.android.map.googlemapsv2.MapHelpV2;
 import org.onebusaway.android.map.googlemapsv2.MarkerListeners;
 import org.onebusaway.android.util.LayerUtils;
 import org.onebusaway.android.util.RegionUtils;
-import org.onebusaway.android.util.UIUtils;
 import org.opentripplanner.routing.bike_rental.BikeRentalStation;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import androidx.core.content.ContextCompat;
 
 /**
  * Class to hold bike stations and control their display on the map.
@@ -170,8 +170,6 @@ public class BikeStationOverlay
             mBikeStationData.selectMaker(marker);
 
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                    Application.get().getPlausibleInstance(),
-                    PlausibleAnalytics.REPORT_BIKE_EVENT_URL,
                     mContext.getString(bikeRentalStation.isFloatingBike ?
                             R.string.analytics_label_bike_station_marker_clicked :
                             R.string.analytics_label_floating_bike_marker_clicked),
@@ -217,15 +215,29 @@ public class BikeStationOverlay
                 && Application.get().getCurrentRegion().getId() == RegionUtils.TAMPA_REGION_ID) {
             BikeRentalStation bikeStation = mBikeStationData.getBikeStationOnMarker(marker);
             if (bikeStation != null) {
+                String url;
+
+                // Trim SoBi IDs - See https://github.com/OneBusAway/onebusaway-android/issues/402#issuecomment-321369719
+                String bikeStationId = bikeStation.id.replace("bike_", "").replace("hub_", "")
+                        .replace("\"", "");
+
+                if (bikeStation.isFloatingBike) {
+                    url = mContext.getString(R.string.sobi_deep_link_floating_bike_url)
+                            + bikeStationId;
+                } else {
+                    url = mContext.getString(R.string.sobi_deep_link_bike_station_url)
+                            + bikeStationId;
+                }
+
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                        Application.get().getPlausibleInstance(),
-                        PlausibleAnalytics.REPORT_BIKE_EVENT_URL,
                         mContext.getString(bikeStation.isFloatingBike ?
                                 R.string.analytics_label_bike_station_balloon_clicked :
                                 R.string.analytics_label_floating_bike_balloon_clicked),
                         null);
 
-                UIUtils.launchTampaHoprApp(mContext);
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                mContext.startActivity(i);
             }
         }
     }

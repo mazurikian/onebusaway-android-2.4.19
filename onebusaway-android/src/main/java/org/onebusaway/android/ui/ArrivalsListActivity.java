@@ -17,19 +17,19 @@
  */
 package org.onebusaway.android.ui;
 
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.view.MenuItem;
-import android.view.Window;
-
 import org.onebusaway.android.io.elements.ObaRoute;
 import org.onebusaway.android.io.elements.ObaStop;
 import org.onebusaway.android.provider.ObaContract;
 import org.onebusaway.android.util.FragmentUtils;
 import org.onebusaway.android.util.ShowcaseViewUtils;
 import org.onebusaway.android.util.UIUtils;
+
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.Window;
 
 import java.util.HashMap;
 
@@ -47,9 +47,16 @@ public class ArrivalsListActivity extends AppCompatActivity {
         private Intent mIntent;
 
         public Builder(Context context, String stopId) {
+            this(context, stopId, null);
+        }
+
+        public Builder(Context context, String stopId, String discussionTitle) {
             mContext = context;
             mIntent = new Intent(context, ArrivalsListActivity.class);
             mIntent.setData(Uri.withAppendedPath(ObaContract.Stops.CONTENT_URI, stopId));
+            if (discussionTitle != null) {
+                mIntent.putExtra(ArrivalsListFragment.DISCUSSION, discussionTitle);
+            }
         }
 
         /**
@@ -107,6 +114,14 @@ public class ArrivalsListActivity extends AppCompatActivity {
     //
     public static void start(Context context, String stopId) {
         new Builder(context, stopId).start();
+    }
+
+    public static void start(Context context, String stopId, String stopName, String stopDirection,
+                             String discussionTitle) {
+        new Builder(context, stopId, discussionTitle)
+                .setStopName(stopName)
+                .setStopDirection(stopDirection)
+                .start();
     }
 
     /**

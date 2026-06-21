@@ -15,13 +15,19 @@
  */
 package org.onebusaway.android.ui;
 
+import com.google.android.material.snackbar.Snackbar;
+
+import org.onebusaway.android.R;
+import org.onebusaway.android.io.elements.ObaSituation;
+import org.onebusaway.android.provider.ObaContract;
+import org.onebusaway.android.util.UIUtils;
+
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Html;
 import android.text.TextUtils;
 import android.text.style.ClickableSpan;
 import android.view.View;
@@ -29,14 +35,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
-
-import com.google.android.material.snackbar.Snackbar;
-
-import org.onebusaway.android.R;
-import org.onebusaway.android.io.elements.ObaSituation;
-import org.onebusaway.android.provider.ObaContract;
-import org.onebusaway.android.util.PreferenceUtils;
-import org.onebusaway.android.util.UIUtils;
 
 /**
  * Displays service alerts (i.e., situations) is a dialog
@@ -129,22 +127,6 @@ public class SituationDialogFragment extends DialogFragment {
                         }
                     }
                 })
-                .setNeutralButton(R.string.hide_all, (dialog, which) -> {
-                    // Hide existing alerts in the database
-                    ObaContract.ServiceAlerts.hideAllAlerts();
-                    // Also set the user preference to hide new alerts
-                    PreferenceUtils.saveBoolean(getString(R.string.preference_key_hide_alerts), true);
-
-                    // Show the snackbar
-                    Snackbar.make(getActivity().findViewById(R.id.fragment_arrivals_list),
-                                    R.string.all_alert_hidden_snackbar_text, Snackbar.LENGTH_SHORT)
-                            .show();
-
-                    dialog.dismiss();
-                    if (mListener != null) {
-                        mListener.onDismiss(true);
-                    }
-                })
                 .setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -155,25 +137,16 @@ public class SituationDialogFragment extends DialogFragment {
                     }
                 });
 
-        final AlertDialog dialog = builder.create();
+        final androidx.appcompat.app.AlertDialog dialog = builder.create();
         dialog.show();
 
         // Set the title, description, and URL (if provided)
         TextView title = (TextView) dialog.findViewById(R.id.alert_title);
         title.setText(args.getString(TITLE));
 
-        TextView descTxtView = (TextView) dialog.findViewById(R.id.alert_description);
+        TextView desc = (TextView) dialog.findViewById(R.id.alert_description);
+        desc.setText(args.getString(DESCRIPTION));
 
-        String desc = args.getString(DESCRIPTION);
-
-        if (descTxtView != null) {
-            if (!TextUtils.isEmpty(desc)) {
-                String htmlDescription = desc.replaceAll("\\r\\n|\\r|\\n", "<br>");
-                descTxtView.setText(Html.fromHtml(htmlDescription));
-            } else {
-                descTxtView.setText(R.string.no_description_available);
-            }
-        }
         TextView urlView = (TextView) dialog.findViewById(R.id.alert_url);
 
         // Remove any previous clickable spans just to be safe

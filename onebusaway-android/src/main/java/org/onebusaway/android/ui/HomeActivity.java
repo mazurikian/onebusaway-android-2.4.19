@@ -23,38 +23,27 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import com.microsoft.embeddedsocial.sdk.EmbeddedSocial;
+import com.microsoft.embeddedsocial.ui.fragment.ActivityFeedFragment;
+import com.microsoft.embeddedsocial.ui.fragment.MyProfileFragment;
+import com.microsoft.embeddedsocial.ui.fragment.PinsFragment;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
-import org.onebusaway.android.io.PlausibleAnalytics;
-import org.onebusaway.android.widealerts.GtfsAlertCallBack;
 import org.onebusaway.android.app.Application;
-import org.onebusaway.android.donations.DonationsManager;
 import org.onebusaway.android.io.ObaAnalytics;
 import org.onebusaway.android.io.elements.ObaRegion;
 import org.onebusaway.android.io.elements.ObaRoute;
 import org.onebusaway.android.io.elements.ObaStop;
 import org.onebusaway.android.io.request.ObaArrivalInfoResponse;
-import org.onebusaway.android.io.request.survey.SurveyListener;
-import org.onebusaway.android.io.request.survey.model.StudyResponse;
-import org.onebusaway.android.io.request.survey.model.SubmitSurveyResponse;
-import org.onebusaway.android.io.request.weather.ObaWeatherRequest;
-import org.onebusaway.android.io.request.weather.models.ObaWeatherResponse;
-import org.onebusaway.android.io.request.weather.WeatherRequestListener;
-import org.onebusaway.android.io.request.weather.WeatherRequestTask;
 import org.onebusaway.android.map.MapModeController;
 import org.onebusaway.android.map.MapParams;
 import org.onebusaway.android.map.googlemapsv2.BaseMapFragment;
 import org.onebusaway.android.map.googlemapsv2.LayerInfo;
 import org.onebusaway.android.region.ObaRegionsTask;
 import org.onebusaway.android.report.ui.ReportActivity;
-import org.onebusaway.android.travelbehavior.TravelBehaviorManager;
-import org.onebusaway.android.travelbehavior.utils.TravelBehaviorUtils;
-import org.onebusaway.android.ui.survey.SurveyManager;
-import org.onebusaway.android.ui.survey.utils.SurveyViewUtils;
-import org.onebusaway.android.ui.weather.RegionCallback;
-import org.onebusaway.android.ui.weather.WeatherUtils;
+import org.onebusaway.android.tripservice.TripService;
 import org.onebusaway.android.util.FragmentUtils;
 import org.onebusaway.android.util.LocationUtils;
 import org.onebusaway.android.util.PermissionUtils;
@@ -62,10 +51,8 @@ import org.onebusaway.android.util.PreferenceUtils;
 import org.onebusaway.android.util.RegionUtils;
 import org.onebusaway.android.util.ShowcaseViewUtils;
 import org.onebusaway.android.util.UIUtils;
-import org.onebusaway.android.widealerts.GtfsAlertsHelper;
 import org.opentripplanner.routing.bike_rental.BikeRentalStation;
 
-import android.Manifest;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -75,14 +62,12 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
-import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -94,7 +79,6 @@ import android.view.Window;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -114,12 +98,7 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatImageButton;
-import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.AccessibilityDelegateCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.fragment.app.FragmentManager;
 
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_ACTIVITY_FEED;
@@ -134,7 +113,6 @@ import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SEND_FEEDBACK;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SETTINGS;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SIGN_IN;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_STARRED_ROUTES;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_STARRED_STOPS;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NavigationDrawerCallbacks;
 import static org.onebusaway.android.util.PermissionUtils.LOCATION_PERMISSIONS;
@@ -145,9 +123,8 @@ import static uk.co.markormesher.android_fab.FloatingActionButton.POSITION_START
 public class HomeActivity extends AppCompatActivity
         implements BaseMapFragment.OnFocusChangedListener,
         BaseMapFragment.OnProgressBarChangedListener,
-        ArrivalsListFragment.Listener, NavigationDrawerCallbacks, WeatherRequestListener , RegionCallback,
+        ArrivalsListFragment.Listener, NavigationDrawerCallbacks,
         ObaRegionsTask.Callback {
-
 
     interface SlidingPanelController {
 
@@ -195,11 +172,9 @@ public class HomeActivity extends AppCompatActivity
 
     View mArrivalsListHeaderSubView;
 
-    CardView weatherView;
+    private ImageButton mZoomInBtn;
 
-    View mSurveyView;
-
-    View mDonationView;
+    private ImageButton mZoomOutBtn;
 
     private FloatingActionButton mFabMyLocation;
 
@@ -221,8 +196,6 @@ public class HomeActivity extends AppCompatActivity
     // Bottom Sliding panel
     SlidingUpPanelLayout mSlidingPanel;
 
-    public static final int BATTERY_OPTIMIZATIONS_PERMISSION_REQUEST = 111;
-
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -239,18 +212,21 @@ public class HomeActivity extends AppCompatActivity
      * Fragments that can be selected as main content via the NavigationDrawer
      */
     MyStarredStopsFragment mMyStarredStopsFragment;
-    MyStarredRoutesFragment mMyStarredRoutesFragment;
 
     BaseMapFragment mMapFragment;
 
     MyRemindersFragment mMyRemindersFragment;
 
+    PinsFragment mMyPinsFragment;
+
+    ActivityFeedFragment mActivityFeedFragment;
+
+    MyProfileFragment mMyProfileFragment;
+
     /**
      * Control which menu options are shown per fragment menu groups
      */
     private boolean mShowStarredStopsMenu = false;
-
-    private boolean mShowStarredRoutesMenu = false;
 
     private boolean mShowArrivalsMenu = false;
 
@@ -282,11 +258,6 @@ public class HomeActivity extends AppCompatActivity
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
-    //private ActivityResultLauncher<String> travelBehaviorPermissionsLauncher;
-
-    private ObaWeatherResponse weatherResponse;
-
-    private SurveyManager surveyManager;
     /**
      * Starts the MapActivity with a particular stop focused with the center of
      * the map at a particular point.
@@ -387,6 +358,9 @@ public class HomeActivity extends AppCompatActivity
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
+        // Workaround to make sure ES SDK is initialized in case we startup to ES Fragments (#953)
+        Application.get().setUpSocial();
+
         setContentView(R.layout.main);
 
         mActivityWeakRef = new WeakReference<>(this);
@@ -407,21 +381,9 @@ public class HomeActivity extends AppCompatActivity
 
         setupGooglePlayServices();
 
-        //setupPermissions(this);
-
         UIUtils.setupActionBar(this);
 
-        setupDonationView(this);
-
-        // To enable checkBatteryOptimizations, also uncomment the
-        // REQUEST_IGNORE_BATTERY_OPTIMIZATIONS permission in AndroidManifest.xml
-        // See https://github.com/OneBusAway/onebusaway-android/pull/988#discussion_r299950506
-//        checkBatteryOptimizations();
-
-        new TravelBehaviorManager(this, getApplicationContext()).
-                registerTravelBehaviorParticipant();
-
-        if (!mInitialStartup || PermissionUtils.hasGrantedAtLeastOnePermission(this, LOCATION_PERMISSIONS)) {
+        if (!mInitialStartup || PermissionUtils.hasGrantedPermissions(this, LOCATION_PERMISSIONS)) {
             // It's not the first startup or if the user has already granted location permissions (Android L and lower), then check the region status
             // Otherwise, wait for a permission callback from the BaseMapFragment before checking the region status
             checkRegionStatus();
@@ -432,11 +394,9 @@ public class HomeActivity extends AppCompatActivity
         if (b != null) {
             if (b.getBoolean(ShowcaseViewUtils.TUTORIAL_WELCOME)) {
                 // Show the welcome tutorial
-                ShowcaseViewUtils.showTutorial(ShowcaseViewUtils.TUTORIAL_WELCOME, this, null, false);
+                ShowcaseViewUtils.showTutorial(ShowcaseViewUtils.TUTORIAL_WELCOME, this, null);
             }
         }
-        initWeatherView();
-        setupSurvey();
     }
 
     @Override
@@ -455,10 +415,6 @@ public class HomeActivity extends AppCompatActivity
     public void onResume() {
         super.onResume();
 
-        // Check if weather view visibility is changed to hidden
-        if(WeatherUtils.isWeatherViewHiddenPref()){
-            WeatherUtils.toggleWeatherViewVisibility(false,weatherView);
-        }
         // Make sure header has sliding panel state
         if (mArrivalsListHeader != null && mSlidingPanel != null) {
             mArrivalsListHeader.setSlidingPanelCollapsed(isSlidingPanelCollapsed());
@@ -474,8 +430,6 @@ public class HomeActivity extends AppCompatActivity
         updateLayersFab();
 
         mFabMyLocation.requestLayout();
-
-        updateDonationsUIVisibility();
     }
 
     @Override
@@ -523,35 +477,15 @@ public class HomeActivity extends AppCompatActivity
                     showStarredStopsFragment();
                     mCurrentNavDrawerPosition = item;
                     ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                            Application.get().getPlausibleInstance(),
-                            PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                             getString(R.string.analytics_label_button_press_star),
                             null);
                 }
                 break;
-            case NAVDRAWER_ITEM_STARRED_ROUTES:
-                if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_STARRED_ROUTES) {
-                    showStarredRoutesFragment();
-                    mCurrentNavDrawerPosition = item;
-                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                            Application.get().getPlausibleInstance(),
-                            PlausibleAnalytics.REPORT_MENU_EVENT_URL,
-                            getString(R.string.analytics_label_button_press_star),
-                            null);
-                }
-                break;
-            // below values are deprecated; fall through to NAVDRAWER_ITEM_NEARBY
-            case NAVDRAWER_ITEM_SIGN_IN:
-            case NAVDRAWER_ITEM_PROFILE:
-            case NAVDRAWER_ITEM_PINS:
-            case NAVDRAWER_ITEM_ACTIVITY_FEED:
             case NAVDRAWER_ITEM_NEARBY:
                 if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_NEARBY) {
                     showMapFragment();
                     mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
                     ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                            Application.get().getPlausibleInstance(),
-                            PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                             getString(R.string.analytics_label_button_press_nearby),
                             null);
                 }
@@ -561,8 +495,6 @@ public class HomeActivity extends AppCompatActivity
                     showMyRemindersFragment();
                     mCurrentNavDrawerPosition = item;
                     ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                            Application.get().getPlausibleInstance(),
-                            PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                             getString(R.string.analytics_label_button_press_reminders),
                             null);
                 }
@@ -571,43 +503,68 @@ public class HomeActivity extends AppCompatActivity
                 Intent planTrip = new Intent(HomeActivity.this, TripPlanActivity.class);
                 startActivity(planTrip);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                        Application.get().getPlausibleInstance(),
-                        PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                         getString(R.string.analytics_label_button_press_trip_plan),
                         null);
                 break;
             case NAVDRAWER_ITEM_PAY_FARE:
                 UIUtils.launchPayMyFareApp(this);
                 break;
+            case NAVDRAWER_ITEM_SIGN_IN:
+                ObaAnalytics.reportLoginEvent(mFirebaseAnalytics,
+                        getString(R.string.analytics_login_embedded_social));
+                EmbeddedSocial.launchSignInActivity(this);
+                break;
+            case NAVDRAWER_ITEM_PROFILE:
+                if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_PROFILE) {
+                    showMyProfileFragment();
+                    mCurrentNavDrawerPosition = item;
+                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                            getString(R.string.analytics_label_button_press_social_profile),
+                            null);
+                }
+                break;
+            case NAVDRAWER_ITEM_PINS:
+                if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_PINS) {
+                    showPinsFragment();
+                    mCurrentNavDrawerPosition = item;
+                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                            getString(R.string.analytics_label_button_press_social_pins),
+                            null);
+                }
+                break;
+            case NAVDRAWER_ITEM_ACTIVITY_FEED:
+                if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_ACTIVITY_FEED) {
+                    showActivityFeedFragment();
+                    mCurrentNavDrawerPosition = item;
+                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                            getString(R.string.analytics_label_button_press_social_activity_feed),
+                            null);
+                }
+                break;
             case NAVDRAWER_ITEM_SETTINGS:
                 Intent preferences = new Intent(HomeActivity.this, PreferencesActivity.class);
                 startActivity(preferences);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                        Application.get().getPlausibleInstance(),
-                        PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                         getString(R.string.analytics_label_button_press_settings),
                         null);
                 break;
             case NAVDRAWER_ITEM_HELP:
+                if (noActiveFragments()) {
+                    showMapFragment();
+                }
                 showDialog(HELP_DIALOG);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                        Application.get().getPlausibleInstance(),
-                        PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                         getString(R.string.analytics_label_button_press_help),
                         null);
                 break;
             case NAVDRAWER_ITEM_SEND_FEEDBACK:
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                        Application.get().getPlausibleInstance(),
-                        PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                         getString(R.string.analytics_label_button_press_feedback),
                         null);
                 goToSendFeedBack();
                 break;
             case NAVDRAWER_ITEM_OPEN_SOURCE:
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                        Application.get().getPlausibleInstance(),
-                        PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                         getString(R.string.analytics_label_button_press_open_source),
                         null);
                 Intent i = new Intent(Intent.ACTION_VIEW);
@@ -615,15 +572,12 @@ public class HomeActivity extends AppCompatActivity
                 startActivity(i);
                 break;
         }
-        updateDonationsUIVisibility();
-        if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_NEARBY) {
-            // Hide survey view unless it's on the map
-            SurveyViewUtils.hideSurveyView(mSurveyView);
-            WeatherUtils.toggleWeatherViewVisibility(false,weatherView);
-        }else{
-            setWeatherData();
-        }
         invalidateOptionsMenu();
+    }
+
+    // Return true if this HomeActivity has no active content fragments
+    private boolean noActiveFragments() {
+        return mMapFragment == null && mMyStarredStopsFragment == null && mMyRemindersFragment == null;
     }
 
     private void handleNearbySelection() {
@@ -634,9 +588,11 @@ public class HomeActivity extends AppCompatActivity
         /**
          * Hide everything that shouldn't be shown
          */
-        hideStarredRoutesFragment();
         hideStarredStopsFragment();
         hideReminderFragment();
+        hidePinsFragment();
+        hideActivityFeedFragment();
+        hideMyProfileFragment();
         mShowStarredStopsMenu = false;
         /**
          * Show fragment (we use show instead of replace to keep the map state)
@@ -667,7 +623,6 @@ public class HomeActivity extends AppCompatActivity
         // Register listener for map focus callbacks
         mMapFragment.setOnFocusChangeListener(this);
         mMapFragment.setOnProgressBarChangedListener(this);
-        mMapFragment.setRegionCallback(this);
 
         getSupportFragmentManager().beginTransaction().show(mMapFragment).commit();
 
@@ -694,8 +649,10 @@ public class HomeActivity extends AppCompatActivity
         hideMapProgressBar();
         hideMapFragment();
         hideReminderFragment();
-        hideStarredRoutesFragment();
         hideSlidingPanel();
+        hidePinsFragment();
+        hideActivityFeedFragment();
+        hideMyProfileFragment();
         mShowArrivalsMenu = false;
         showZoomControls(false);
 
@@ -720,41 +677,6 @@ public class HomeActivity extends AppCompatActivity
         setTitle(getResources().getString(R.string.navdrawer_item_starred_stops));
     }
 
-    private void showStarredRoutesFragment() {
-        FragmentManager fm = getSupportFragmentManager();
-        /**
-         * Hide everything that shouldn't be shown
-         */
-        hideFloatingActionButtons();
-        hideMapProgressBar();
-        hideMapFragment();
-        hideReminderFragment();
-        hideSlidingPanel();
-        hideStarredStopsFragment();
-        mShowArrivalsMenu = false;
-        showZoomControls(false);
-
-        /**
-         * Show fragment (we use show instead of replace to keep the map state)
-         */
-        mShowStarredRoutesMenu = true;
-        if (mMyStarredRoutesFragment == null) {
-            // First check to see if an instance of MyStarredRoutesFragment already exists
-            mMyStarredRoutesFragment = (MyStarredRoutesFragment) fm
-                    .findFragmentByTag(MyStarredRoutesFragment.TAG);
-
-            if (mMyStarredRoutesFragment == null) {
-                // No existing fragment was found, so create a new one
-                Log.d(TAG, "Creating new MyStarredRoutesFragment");
-                mMyStarredRoutesFragment = new MyStarredRoutesFragment();
-                fm.beginTransaction().add(R.id.main_fragment_container, mMyStarredRoutesFragment,
-                        MyStarredRoutesFragment.TAG).commit();
-            }
-        }
-        fm.beginTransaction().show(mMyStarredRoutesFragment).commit();
-        setTitle(getResources().getString(R.string.navdrawer_item_starred_routes));
-    }
-
     private void showMyRemindersFragment() {
         FragmentManager fm = getSupportFragmentManager();
         /**
@@ -762,10 +684,12 @@ public class HomeActivity extends AppCompatActivity
          */
         hideFloatingActionButtons();
         hideMapProgressBar();
-        hideStarredRoutesFragment();
         hideStarredStopsFragment();
         hideMapFragment();
         hideSlidingPanel();
+        hidePinsFragment();
+        hideActivityFeedFragment();
+        hideMyProfileFragment();
         mShowArrivalsMenu = false;
         mShowStarredStopsMenu = false;
         showZoomControls(false);
@@ -789,6 +713,114 @@ public class HomeActivity extends AppCompatActivity
         setTitle(getResources().getString(R.string.navdrawer_item_my_reminders));
     }
 
+    private void showPinsFragment() {
+        FragmentManager fm = getSupportFragmentManager();
+        /**
+         * Hide everything that shouldn't be shown
+         */
+        hideFloatingActionButtons();
+        hideMapProgressBar();
+        hideMapFragment();
+        hideStarredStopsFragment();
+        hideReminderFragment();
+        hideActivityFeedFragment();
+        hideMyProfileFragment();
+        hideSlidingPanel();
+        mShowArrivalsMenu = false;
+        showZoomControls(false);
+        /**
+         * Show fragment (we use show instead of replace to keep the map state)
+         */
+        mShowStarredStopsMenu = false;
+        if (mMyPinsFragment == null) {
+            // First check to see if an instance of PinsFragment already exists (see #356)
+            mMyPinsFragment = (PinsFragment) fm
+                    .findFragmentByTag(PinsFragment.TAG);
+
+            if (mMyPinsFragment == null) {
+                // No existing fragment was found, so create a new one
+                Log.d(TAG, "Creating new PinsFragment");
+                mMyPinsFragment = new PinsFragment();
+                fm.beginTransaction().add(R.id.main_fragment_container, mMyPinsFragment,
+                        PinsFragment.TAG).commit();
+            }
+        }
+        fm.beginTransaction().show(mMyPinsFragment).commit();
+        setTitle(getResources().getString(R.string.navdrawer_item_pin));
+    }
+
+    private void showActivityFeedFragment() {
+        FragmentManager fm = getSupportFragmentManager();
+        /**
+         * Hide everything that shouldn't be shown
+         */
+        hideFloatingActionButtons();
+        hideMapProgressBar();
+        hideMapFragment();
+        hideStarredStopsFragment();
+        hideReminderFragment();
+        hidePinsFragment();
+        hideMyProfileFragment();
+        hideSlidingPanel();
+        mShowArrivalsMenu = false;
+        showZoomControls(false);
+        /**
+         * Show fragment (we use show instead of replace to keep the map state)
+         */
+        mShowStarredStopsMenu = false;
+        if (mActivityFeedFragment == null) {
+            // First check to see if an instance of PinsFragment already exists (see #356)
+            mActivityFeedFragment = (ActivityFeedFragment) fm
+                    .findFragmentByTag(ActivityFeedFragment.TAG);
+
+            if (mActivityFeedFragment == null) {
+                // No existing fragment was found, so create a new one
+                Log.d(TAG, "Creating new ActivityFeedFragment");
+                mActivityFeedFragment = new ActivityFeedFragment();
+                fm.beginTransaction().add(R.id.main_fragment_container, mActivityFeedFragment,
+                        ActivityFeedFragment.TAG).commit();
+            }
+        }
+        fm.beginTransaction().show(mActivityFeedFragment).commit();
+        setTitle(getResources().getString(R.string.navdrawer_item_activity_feed));
+    }
+
+    private void showMyProfileFragment() {
+        FragmentManager fm = getSupportFragmentManager();
+        /**
+         * Hide everything that shouldn't be shown
+         */
+        hideFloatingActionButtons();
+        hideMapProgressBar();
+        hideMapFragment();
+        hideStarredStopsFragment();
+        hideReminderFragment();
+        hidePinsFragment();
+        hideActivityFeedFragment();
+        hideSlidingPanel();
+        mShowArrivalsMenu = false;
+        showZoomControls(false);
+        /**
+         * Show fragment (we use show instead of replace to keep the map state)
+         */
+        mShowStarredStopsMenu = false;
+        if (mMyProfileFragment == null) {
+            // First check to see if an instance of PinsFragment already exists (see #356)
+            mMyProfileFragment = (MyProfileFragment) fm
+                    .findFragmentByTag(MyProfileFragment.TAG);
+
+            if (mMyProfileFragment == null) {
+                // No existing fragment was found, so create a new one
+                Log.d(TAG, "Creating new MyProfileFragment");
+                mMyProfileFragment = new MyProfileFragment();
+                fm.beginTransaction().add(R.id.main_fragment_container, mMyProfileFragment,
+                        MyProfileFragment.TAG).commit();
+            }
+        }
+        fm.beginTransaction().show(mMyProfileFragment).commit();
+        setTitle(getResources().getString(R.string.navdrawer_item_profile));
+    }
+
     private void hideMapFragment() {
         FragmentManager fm = getSupportFragmentManager();
         mMapFragment = (BaseMapFragment) fm.findFragmentByTag(BaseMapFragment.TAG);
@@ -806,21 +838,39 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
-    private void hideStarredRoutesFragment() {
-        FragmentManager fm = getSupportFragmentManager();
-        mMyStarredRoutesFragment = (MyStarredRoutesFragment) fm.findFragmentByTag(
-                MyStarredRoutesFragment.TAG);
-        if (mMyStarredRoutesFragment != null && !mMyStarredRoutesFragment.isHidden()) {
-            fm.beginTransaction().hide(mMyStarredRoutesFragment).commit();
-        }
-    }
-
     private void hideReminderFragment() {
         FragmentManager fm = getSupportFragmentManager();
         mMyRemindersFragment = (MyRemindersFragment) fm
                 .findFragmentByTag(MyRemindersFragment.TAG);
         if (mMyRemindersFragment != null && !mMyRemindersFragment.isHidden()) {
             fm.beginTransaction().hide(mMyRemindersFragment).commit();
+        }
+    }
+
+    private void hidePinsFragment() {
+        FragmentManager fm = getSupportFragmentManager();
+        mMyPinsFragment = (PinsFragment) fm.findFragmentByTag(
+                PinsFragment.TAG);
+        if (mMyPinsFragment != null && !mMyPinsFragment.isHidden()) {
+            fm.beginTransaction().hide(mMyPinsFragment).commit();
+        }
+    }
+
+    private void hideActivityFeedFragment() {
+        FragmentManager fm = getSupportFragmentManager();
+        mActivityFeedFragment = (ActivityFeedFragment) fm.findFragmentByTag(
+                ActivityFeedFragment.TAG);
+        if (mActivityFeedFragment != null && !mActivityFeedFragment.isHidden()) {
+            fm.beginTransaction().hide(mActivityFeedFragment).commit();
+        }
+    }
+
+    private void hideMyProfileFragment() {
+        FragmentManager fm = getSupportFragmentManager();
+        mMyProfileFragment = (MyProfileFragment) fm.findFragmentByTag(
+                MyProfileFragment.TAG);
+        if (mMyProfileFragment != null && !mMyProfileFragment.isHidden()) {
+            fm.beginTransaction().hide(mMyProfileFragment).commit();
         }
     }
 
@@ -856,7 +906,6 @@ public class HomeActivity extends AppCompatActivity
         menu.setGroupVisible(R.id.main_options_menu_group, true);
         menu.setGroupVisible(R.id.arrival_list_menu_group, mShowArrivalsMenu);
         menu.setGroupVisible(R.id.starred_stop_menu_group, mShowStarredStopsMenu);
-        menu.setGroupVisible(R.id.starred_route_menu_group, mShowStarredRoutesMenu);
     }
 
     @Override
@@ -867,8 +916,6 @@ public class HomeActivity extends AppCompatActivity
         if (id == R.id.search) {
             onSearchRequested();
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                    Application.get().getPlausibleInstance(),
-                    PlausibleAnalytics.REPORT_SEARCH_EVENT_URL,
                     getString(R.string.analytics_label_button_press_search_box),
                     null);
             return true;
@@ -914,7 +961,9 @@ public class HomeActivity extends AppCompatActivity
                         switch (which) {
                             case 0:
                                 ShowcaseViewUtils.resetAllTutorials(HomeActivity.this);
+                                mNavigationDrawerFragment.setSavedPosition(NAVDRAWER_ITEM_NEARBY);
                                 NavHelp.goHome(HomeActivity.this, true);
+
                                 break;
                             case 1:
                                 showDialog(LEGEND_DIALOG);
@@ -935,8 +984,6 @@ public class HomeActivity extends AppCompatActivity
                                 }
                                 UIUtils.goToUrl(HomeActivity.this, twitterUrl);
                                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                                        Application.get().getPlausibleInstance(),
-                                        PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                                         getString(R.string.analytics_label_twitter),
                                         null);
                                 break;
@@ -1022,18 +1069,6 @@ public class HomeActivity extends AppCompatActivity
         etaTextView.setTextSize(etaTextFontSize);
         etaTextView.setText("5");
 
-        // Canceled View
-        etaAndMin = legendDialogView.findViewById(R.id.eta_view_canceled);
-        d1 = (GradientDrawable) etaAndMin.getBackground();
-        d1.setColor(resources.getColor(R.color.stop_info_scheduled_time));
-        etaAndMin.findViewById(R.id.eta_realtime_indicator).setVisibility(View.INVISIBLE);
-        etaTextView = etaAndMin.findViewById(R.id.eta);
-        etaTextView.setTextSize(etaTextFontSize);
-        etaTextView.setText("5");
-        etaTextView.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
-        TextView etaMin = etaAndMin.findViewById(R.id.eta_min);
-        etaMin.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
-
         builder.setView(legendDialogView);
 
         builder.setNeutralButton(R.string.main_help_close,
@@ -1067,6 +1102,11 @@ public class HomeActivity extends AppCompatActivity
 
         if (oldVer < newVer && mActivityWeakRef.get() != null && !mActivityWeakRef.get().isFinishing()) {
             mActivityWeakRef.get().showDialog(WHATSNEW_DIALOG);
+
+            // Updates will remove the alarms. This should put them back.
+            // (Unfortunately I can't find a way to reschedule them without
+            // having the app run again).
+            TripService.scheduleAll(this, true);
             PreferenceUtils.saveInt(WHATS_NEW_VER, appInfo.versionCode);
             return true;
         }
@@ -1104,8 +1144,6 @@ public class HomeActivity extends AppCompatActivity
                     routes);
 
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                    Application.get().getPlausibleInstance(),
-                    PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                     getString(R.string.analytics_label_button_press_map_icon),
                     null);
         } else {
@@ -1226,7 +1264,7 @@ public class HomeActivity extends AppCompatActivity
 
         // Show the tutorial explaining arrival times
         ShowcaseViewUtils.showTutorial(ShowcaseViewUtils.TUTORIAL_ARRIVAL_HEADER_ARRIVAL_INFO, this,
-                response, false);
+                response);
 
         // Make sure the panel is stationary before showing the starred routes tutorial
         if (mSlidingPanel != null &&
@@ -1236,9 +1274,9 @@ public class HomeActivity extends AppCompatActivity
                                 == SlidingUpPanelLayout.PanelState.EXPANDED)) {
             ShowcaseViewUtils
                     .showTutorial(ShowcaseViewUtils.TUTORIAL_ARRIVAL_HEADER_STAR_ROUTE, this,
-                            response, false);
+                            response);
         }
-        ShowcaseViewUtils.showTutorial(ShowcaseViewUtils.TUTORIAL_RECENT_STOPS_ROUTES, this, null, false);
+        ShowcaseViewUtils.showTutorial(ShowcaseViewUtils.TUTORIAL_RECENT_STOPS_ROUTES, this, null);
     }
 
     /**
@@ -1472,9 +1510,13 @@ public class HomeActivity extends AppCompatActivity
     }
 
     private void setupZoomButtons() {
-        ImageButton mZoomInBtn = findViewById(R.id.btnZoomIn);
-        ImageButton mZoomOutBtn = findViewById(R.id.btnZoomOut);
+
+        mZoomInBtn = findViewById(R.id.btnZoomIn);
+
+        mZoomOutBtn = findViewById(R.id.btnZoomOut);
+
         mZoomInBtn.setOnClickListener(view -> mMapFragment.zoomIn());
+
         mZoomOutBtn.setOnClickListener(view -> mMapFragment.zoomOut());
     }
 
@@ -1485,12 +1527,9 @@ public class HomeActivity extends AppCompatActivity
             if (mMapFragment != null) {
                 // Reset the preference to ask user to enable location
                 PreferenceUtils.saveBoolean(getString(R.string.preference_key_never_show_location_dialog), false);
-                PreferenceUtils.setUserDeniedLocationPermissions(false);
 
                 mMapFragment.setMyLocation(true, true);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                        Application.get().getPlausibleInstance(),
-                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_label_button_press_location),
                         null);
             }
@@ -1560,7 +1599,7 @@ public class HomeActivity extends AppCompatActivity
             }
         }
     }
-
+    
     /**
      * Moves both Floating Action Buttons as response to sliding panel height changes.
      * <p>
@@ -1714,22 +1753,13 @@ public class HomeActivity extends AppCompatActivity
 
     private void setupLayersSpeedDial() {
         mLayersFab = findViewById(R.id.layersSpeedDial);
+
         ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) mLayersFab
                 .getLayoutParams();
         LAYERS_FAB_DEFAULT_BOTTOM_MARGIN = p.bottomMargin;
 
         mLayersFab.setButtonIconResource(R.drawable.ic_layers_white_24dp);
         mLayersFab.setButtonBackgroundColour(ContextCompat.getColor(this, R.color.theme_accent));
-
-        // Find the card view (the actual clickable element) to set accessibility properties
-        View fabCard = mLayersFab.findViewById(R.id.fab_card);
-        if (fabCard != null) {
-            fabCard.setContentDescription(getString(R.string.map_option_layers));
-            fabCard.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-        } else {
-            // Fallback to the main container if card isn't available
-            mLayersFab.setContentDescription(getString(R.string.map_option_layers));
-        }
 
         LayersSpeedDialAdapter adapter = new LayersSpeedDialAdapter(this);
         // Add the BaseMapFragment listener to activate the layer on the map
@@ -1753,25 +1783,9 @@ public class HomeActivity extends AppCompatActivity
         });
         mLayersFab.setSpeedDialMenuAdapter(adapter);
         mLayersFab.setOnSpeedDialMenuOpenListener(
-                v -> {
-                    mLayersFab.setButtonIconResource(R.drawable.ic_add_white_24dp);
-                    // Update content description to match the new state
-                    if (fabCard != null) {
-                        fabCard.setContentDescription(getString(R.string.map_option_layers_close));
-                    } else {
-                        mLayersFab.setContentDescription(getString(R.string.map_option_layers_close));
-                    }
-                });
+                v -> mLayersFab.setButtonIconResource(R.drawable.ic_add_white_24dp));
         mLayersFab.setOnSpeedDialMenuCloseListener(
-                v -> {
-                    mLayersFab.setButtonIconResource(R.drawable.ic_layers_white_24dp);
-                    // Reset content description to default state
-                    if (fabCard != null) {
-                        fabCard.setContentDescription(getString(R.string.map_option_layers));
-                    } else {
-                        mLayersFab.setContentDescription(getString(R.string.map_option_layers));
-                    }
-                });
+                v -> mLayersFab.setButtonIconResource(R.drawable.ic_layers_white_24dp));
         mLayersFab.setContentCoverEnabled(false);
     }
 
@@ -1971,37 +1985,6 @@ public class HomeActivity extends AppCompatActivity
     }
 
     /**
-     * Setup permissions that are only requested if the user joins the travel behavior study. This
-     * method must be called from #onCreate().
-     *
-     * A call to #requestPhysicalActivityPermission() invokes the permission request, and should only
-     * be called in the case when the user opts into the study.
-     * @param activity
-     */
-    private void setupPermissions(AppCompatActivity activity) {
-//        travelBehaviorPermissionsLauncher =
-//                registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-//                    if (isGranted) {
-//                        // User opt-ed into study and granted physical activity tracking - now request background location permissions (when targeting Android 11 we can't request both simultaneously)
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                            activity.requestPermissions(TravelBehaviorConstants.BACKGROUND_LOCATION_PERMISSION, BACKGROUND_LOCATION_PERMISSION_REQUEST);
-//                        }
-//                    }
-//                });
-    }
-
-    /**
-     * Requests physical activity permissions, and then subsequently background location
-     * permissions (based on the initialization in #setupPermissions() if the user grants physical
-     * activity permissions. This method should only be called after the user opts into the travel behavior study.
-     */
-    public void requestPhysicalActivityPermission() {
-//        if (travelBehaviorPermissionsLauncher != null){
-//            travelBehaviorPermissionsLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION);
-//        }
-    }
-
-    /**
      * Our definition of collapsed is consistent with SlidingPanel pre-v3.0.0 definition - we don't
      * consider the panel changing from the hidden state to the collapsed state to be a "collapsed"
      * event.  v3.0.0 and higher fire the "collapsed" event when coming from the hidden state.
@@ -2019,242 +2002,4 @@ public class HomeActivity extends AppCompatActivity
     public ArrivalsListFragment getArrivalsListFragment() {
         return mArrivalsListFragment;
     }
-
-    private void checkBatteryOptimizations() {
-        if (PreferenceUtils.getBoolean(getString(R.string.not_request_battery_optimizations_key),
-                false) || !TravelBehaviorUtils.isUserParticipatingInStudy()) {
-            return;
-        }
-
-        Boolean ignoringBatteryOptimizations = Application.isIgnoringBatteryOptimizations(getApplicationContext());
-        if (ignoringBatteryOptimizations != null && !ignoringBatteryOptimizations) {
-            showIgnoreBatteryOptimizationDialog();
-        }
-    }
-
-    private void showIgnoreBatteryOptimizationDialog() {
-        new android.app.AlertDialog.Builder(this)
-                .setMessage(R.string.application_ignoring_battery_opt_message)
-                .setTitle(R.string.application_ignoring_battery_opt_title)
-                .setIcon(R.drawable.ic_alert_warning)
-                .setCancelable(false)
-                .setPositiveButton(R.string.travel_behavior_dialog_yes,
-                        (dialog, which) -> {
-                            if (PermissionUtils.hasGrantedAllPermissions(this, new String[]{Manifest.
-                                    permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS})) {
-                                UIUtils.openBatteryIgnoreIntent(this);
-                            } else {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                    requestPermissions(new String[]{Manifest.
-                                                    permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS},
-                                            BATTERY_OPTIMIZATIONS_PERMISSION_REQUEST);
-                                }
-                            }
-                            PreferenceUtils.saveBoolean(getString(R.string.not_request_battery_optimizations_key),
-                                    true);
-                        })
-                .setNegativeButton(R.string.travel_behavior_dialog_no,
-                        (dialog, which) -> {
-                            PreferenceUtils.saveBoolean(getString(R.string.not_request_battery_optimizations_key),
-                                    true);
-                        })
-                .create().show();
-    }
-
-    // Getting a callback from BaseMapFragment to check if we are in a valid region or not
-    @Override
-    public void onValidRegion(boolean isValid) {
-        if(isValid){
-            makeWeatherRequest();
-            getGtfsAlerts();
-        }else{
-            WeatherUtils.toggleWeatherViewVisibility(false,weatherView);
-            weatherResponse = null;
-        }
-    }
-
-    private void initWeatherView(){
-        weatherView = findViewById(R.id.weatherView);
-    }
-
-    private void setWeatherData() {
-        if(weatherResponse == null || mCurrentNavDrawerPosition != NAVDRAWER_ITEM_NEARBY || WeatherUtils.isWeatherViewHiddenPref()) return;
-        WeatherUtils.toggleWeatherViewVisibility(true,weatherView);
-        TextView tempTxtView = findViewById(R.id.weatherTextView);
-        ImageView weatherImageView = findViewById(R.id.weatherStateImageView);
-        String weatherIcon = weatherResponse.getCurrent_forecast().getIcon();
-        String weatherSummary = weatherResponse.getCurrent_forecast().getSummary();
-        double weatherTemp = weatherResponse.getCurrent_forecast().getTemperature();
-
-        if (weatherIcon != null && !weatherIcon.isEmpty()) {
-            WeatherUtils.setWeatherImage(weatherImageView, weatherIcon);
-        }else{
-            weatherImageView.setVisibility(View.GONE);
-        }
-        WeatherUtils.setWeatherTemp(tempTxtView, weatherTemp);
-        // Show weather state when click.
-        weatherView.setOnClickListener(view -> {
-            if (weatherSummary != null) {
-                Toast.makeText(getApplicationContext(), weatherSummary.trim(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void makeWeatherRequest(){
-        if(WeatherUtils.isWeatherViewHiddenPref()) return;
-        // If weather response is null that means we need to call the weather api to get the new data
-        // Adding this will avoid doing multiple requests to the weather API when updating the map in real-time
-        if(weatherResponse == null){
-            ObaWeatherRequest weatherRequest = ObaWeatherRequest.newRequest(Application.get().getCurrentRegion().getId());
-            WeatherRequestTask task = new WeatherRequestTask(this);
-            task.execute(weatherRequest);
-            Log.d(TAG,"Weather requested");
-        }else{
-            // We have a weather data no need to make a request
-            setWeatherData();
-        }
-
-    }
-
-    @Override
-    public void onWeatherResponseReceived(ObaWeatherResponse response) {
-        if(response != null && response.getCurrent_forecast() != null){
-            weatherResponse = response;
-            setWeatherData();
-        }
-    }
-
-    @Override
-    public void onWeatherRequestFailed() {
-        Log.d(TAG,"Weather Request Fail");
-    }
-
-    private void setupDonationView(HomeActivity homeActivity) {
-        mDonationView = findViewById(R.id.donationView);
-        AppCompatImageButton closeButton = mDonationView.findViewById(R.id.btnDonationViewClose);
-        Button learnMoreButton = mDonationView.findViewById(R.id.btnDonationViewLearnMore);
-        Button donateButton = mDonationView.findViewById(R.id.btnDonationViewDonate);
-
-        closeButton.setOnClickListener(b -> {
-            AlertDialog dismissDialog = buildDismissDonationsDialog();
-            dismissDialog.show();
-        });
-
-        learnMoreButton.setOnClickListener(b -> {
-            Intent intent = new Intent(this, DonationLearnMoreActivity.class);
-            startActivity(intent);
-        });
-
-        donateButton.setOnClickListener(b -> {
-            DonationsManager donationsManager = Application.getDonationsManager();
-            donationsManager.dismissDonationRequests();
-
-            Intent intent = donationsManager.buildOpenDonationsPageIntent();
-            startActivity(intent);
-        });
-
-        updateDonationsUIVisibility();
-    }
-
-    private void updateDonationsUIVisibility() {
-        mDonationView = findViewById(R.id.donationView);
-        if(mDonationView == null) return;
-        DonationsManager donationsManager = Application.getDonationsManager();
-
-        if (donationsManager.shouldShowDonationUI() && mCurrentNavDrawerPosition == NAVDRAWER_ITEM_NEARBY) {
-            mDonationView.setVisibility(View.VISIBLE);
-        }
-        else {
-            mDonationView.setVisibility(View.GONE);
-        }
-    }
-
-    /**
-     * Creates an AlertDialog that will give the user options for dismissing the donations UI.
-     * @return the AlertDialog for presentation.
-     */
-    private AlertDialog buildDismissDonationsDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setTitle(R.string.donation_dismiss_dialog_title)
-                .setMessage(R.string.donation_dismiss_dialog_body)
-                .setNegativeButton(
-                        R.string.donation_dismiss_dialog_dont_want_to_help_button,
-                        (dialog, which) -> {
-                            Application.getDonationsManager().dismissDonationRequests();
-                            updateDonationsUIVisibility();
-                        }
-                )
-                .setNeutralButton(R.string.donation_dismiss_dialog_remind_me_later_button,
-                        (dialog, which) -> {
-                            Application.getDonationsManager().remindUserLater();
-                            updateDonationsUIVisibility();
-                        })
-                .setPositiveButton(R.string.donation_dismiss_dialog_cancel_button, (d, w) -> {})
-                .setCancelable(true);
-
-        return builder.create();
-    }
-    private void initSurveyView(){
-        mSurveyView = findViewById(R.id.surveyView);
-    }
-    private void setupSurvey() {
-        if(Application.get().getCurrentRegion() == null || mCurrentNavDrawerPosition != NAVDRAWER_ITEM_NEARBY) return;
-        initSurveyView();
-        initSurveyManager(mSurveyView);
-    }
-
-    private void initSurveyManager(View surveyView){
-        surveyManager = new SurveyManager(this, surveyView,false, new SurveyListener() {
-            @Override
-            public void onSurveyResponseReceived(StudyResponse response) {
-                surveyManager.onSurveyResponseReceived(response);
-            }
-
-            @Override
-            public void onSurveyResponseFail() {
-                surveyManager.onSurveyResponseFail();
-            }
-
-            @Override
-            public void onSubmitSurveyResponseReceived(SubmitSurveyResponse response) {
-                surveyManager.onSubmitSurveyResponseReceived(response);
-            }
-
-            @Override
-            public void onSubmitSurveyFail() {
-                surveyManager.onSubmitSurveyFail();
-            }
-
-
-            @Override
-            public void onSkipSurvey() {
-                surveyManager.onSkipSurvey();
-            }
-
-            @Override
-            public void onRemindMeLater() {
-                surveyManager.onRemindMeLater();
-            }
-
-            @Override
-            public void onCancelSurvey() {
-                surveyManager.onCancelSurvey();
-            }
-
-        });
-        surveyManager.requestSurveyData();
-    }
-
-    private void getGtfsAlerts() {
-        String regionId = String.valueOf(Application.get().getCurrentRegion().getId());
-        Application.getGtfsAlerts().fetchAlerts(regionId, new GtfsAlertCallBack() {
-            @Override
-            public void onAlert(String title, String message, String url) {
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    GtfsAlertsHelper.showWideAlertDialog(HomeActivity.this, title, message, url);
-                });
-            }
-        });
-    }
-
 }

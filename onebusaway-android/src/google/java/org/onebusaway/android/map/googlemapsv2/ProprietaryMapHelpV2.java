@@ -15,6 +15,18 @@
  */
 package org.onebusaway.android.map.googlemapsv2;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+
+import org.onebusaway.android.R;
+import org.onebusaway.android.directions.util.CustomAddress;
+import org.onebusaway.android.io.elements.ObaRegion;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,18 +38,6 @@ import android.net.Uri;
 import android.view.View;
 
 import androidx.fragment.app.Fragment;
-
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.libraries.places.compat.Place;
-import com.google.android.libraries.places.compat.ui.PlaceAutocomplete;
-
-import org.onebusaway.android.R;
-import org.onebusaway.android.directions.util.CustomAddress;
-import org.onebusaway.android.io.elements.ObaRegion;
 
 /**
  * Helper methods specific to Google Maps API v2
@@ -174,7 +174,8 @@ public class ProprietaryMapHelpV2 {
     }
 
     /**
-     * Sets the zIndex for the given marker to the given zIndex.
+     * Sets the zIndex for the given marker to the given zIndex.  This is in ProprietaryMapHelpV2
+     * because there is no such corresponding Marker.setZIndex() method on Amazon Maps v2.
      * @param m marker to set the zIndex for
      * @param zIndex zIndex to set on the given marker (default is 0)
      */

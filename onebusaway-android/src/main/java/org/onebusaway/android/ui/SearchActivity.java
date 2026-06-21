@@ -15,17 +15,16 @@
  */
 package org.onebusaway.android.ui;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
+import org.onebusaway.android.io.ObaAnalytics;
+import org.onebusaway.android.util.UIUtils;
+
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.Window;
-
-import com.google.firebase.analytics.FirebaseAnalytics;
-
-import org.onebusaway.android.app.Application;
-import org.onebusaway.android.io.ObaAnalytics;
-import org.onebusaway.android.util.UIUtils;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
@@ -36,6 +35,7 @@ public class SearchActivity extends AppCompatActivity {
     //private static final String TAG = "SearchActivity";
 
     private FirebaseAnalytics mFirebaseAnalytics;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
@@ -71,7 +71,7 @@ public class SearchActivity extends AppCompatActivity {
         } else if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             // handles a search query
             String query = intent.getStringExtra(SearchManager.QUERY);
-            ObaAnalytics.reportSearchEvent(Application.get().getPlausibleInstance(), mFirebaseAnalytics, query);
+            ObaAnalytics.reportSearchEvent(mFirebaseAnalytics, query);
             doSearch(query);
         }
     }

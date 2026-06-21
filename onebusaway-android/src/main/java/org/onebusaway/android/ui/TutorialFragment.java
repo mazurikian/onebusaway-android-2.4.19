@@ -15,6 +15,8 @@
 */
 package org.onebusaway.android.ui;
 
+import org.onebusaway.android.R;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -29,8 +31,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import org.onebusaway.android.R;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;

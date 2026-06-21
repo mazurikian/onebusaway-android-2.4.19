@@ -16,17 +16,16 @@
  */
 package org.onebusaway.android.ui;
 
-import android.content.Context;
-import android.content.res.Resources;
-
 import org.onebusaway.android.R;
 import org.onebusaway.android.io.elements.ObaArrivalInfo;
 import org.onebusaway.android.io.elements.ObaArrivalInfo.Frequency;
 import org.onebusaway.android.io.elements.Occupancy;
-import org.onebusaway.android.io.elements.Status;
 import org.onebusaway.android.provider.ObaContract;
 import org.onebusaway.android.util.ArrivalInfoUtils;
 import org.onebusaway.android.util.UIUtils;
+
+import android.content.Context;
+import android.content.res.Resources;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -59,8 +58,6 @@ public final class ArrivalInfo {
 
     private final Occupancy mPredictedOccupancy;
 
-    private final Status mStatus;
-
     /**
      * @param includeArrivalDepartureInStatusLabel true if the arrival/departure label
      *                                             should be
@@ -88,7 +85,7 @@ public final class ArrivalInfo {
         final long scheduledMins = scheduled / ms_in_mins;
         final long predictedMins = predicted / ms_in_mins;
 
-        if (info.getPredicted()) {
+        if (predicted != 0) {
             mPredicted = true;
             mEta = predictedMins - nowMins;
             mDisplayTime = predicted;
@@ -111,12 +108,7 @@ public final class ArrivalInfo {
         mNotifyText = computeNotifyText(context);
 
         mHistoricalOccupancy = info.getHistoricalOccupancy();
-        mPredictedOccupancy = info.getOccupancyStatus();
-        if (info.getTripStatus() != null) {
-            mStatus = info.getTripStatus().getStatus();
-        } else {
-            mStatus = null;
-        }
+        mPredictedOccupancy = info.getPredictedOccupancy();
     }
 
     /**
@@ -136,22 +128,10 @@ public final class ArrivalInfo {
 
         final Resources res = context.getResources();
 
-        // CANCELED trips
-        if (info.getTripStatus() != null && Status.CANCELED.equals(info.getTripStatus().getStatus())) {
-            if (!includeArrivalDeparture) {
-                return context.getString(R.string.stop_info_canceled);
-            }
-
-            if (mIsArrival) {
-                return context.getString(R.string.stop_info_canceled_arrival);
-            } else {
-                return context.getString(R.string.stop_info_canceled_departure);
-            }
-        }
-
-        // Frequency (exact_times=0) trips
         Frequency frequency = info.getFrequency();
+
         if (frequency != null) {
+
             int headwayAsMinutes = (int) (frequency.getHeadway() / 60);
             DateFormat formatter = DateFormat.getTimeInstance(DateFormat.SHORT);
 
@@ -171,7 +151,6 @@ public final class ArrivalInfo {
         }
 
         if (predicted != 0) {
-            // Real-time info
             long delay = predictedMins - scheduledMins;
 
             if (mEta >= 0) {
@@ -389,14 +368,5 @@ public final class ArrivalInfo {
      */
     public Occupancy getPredictedOccupancy() {
         return mPredictedOccupancy;
-    }
-
-    /**
-     * Returns the status of the trip, or null if the trip status doesn't exist
-     *
-     * @return the status of the trip, or null if the trip status doesn't exist
-     */
-    public Status getStatus() {
-        return mStatus;
     }
 }

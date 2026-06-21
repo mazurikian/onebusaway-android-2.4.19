@@ -21,10 +21,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import org.geojson.Feature;
-import org.geojson.Point;
-
-import java.util.ArrayList;
 import java.util.Locale;
 
 
@@ -37,8 +33,6 @@ public class CustomAddress extends Address {
 
     private static final int ADDRESS_MAX_LINES_TO_SHOW = 5;
 
-    private boolean isTransitCategory = false;
-
     public CustomAddress(Locale locale) {
         super(locale);
     }
@@ -47,10 +41,6 @@ public class CustomAddress extends Address {
         super(Locale.getDefault());
     }
 
-    /**
-     * Creates a CustomAddress out of a Android Address from the Android platform Geocoder API
-     * @param address
-     */
     public CustomAddress(Address address) {
         super(address.getLocale());
         for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
@@ -71,47 +61,6 @@ public class CustomAddress extends Address {
         super.setPhone(address.getPhone());
         super.setUrl(address.getUrl());
         super.setExtras(address.getExtras());
-    }
-
-    /**
-     * Creates a CustomAddress out of a GeoJSON Feature (e.g., from Pelias Autocomplete API)
-     * @param address
-     */
-    public CustomAddress(Feature address) {
-        super(Locale.getDefault());
-
-        // TODO - see if we need to fill out more fields
-        // For example response with fields see https://github.com/CUTR-at-USF/pelias-client-library/blob/master/src/test/resources/autocomplete-with-focus.json
-        // and https://github.com/CUTR-at-USF/pelias-client-library/blob/master/src/test/java/edu/usf/cutr/pelias/AutocompleteTest.java#L42
-        super.setAddressLine(0, (String) address.getProperties().get("name"));
-        super.setFeatureName((String) address.getProperties().get("label"));
-//        super.setAdminArea(address.getAdminArea());
-//        super.setSubAdminArea(address.getSubAdminArea());
-//        super.setLocality((String) address.getProperties().get("locality"));
-//        super.setSubLocality(address.getSubLocality());
-//        super.setThoroughfare(address.getThoroughfare());
-//        super.setSubThoroughfare(address.getSubThoroughfare());
-        super.setPostalCode((String) address.getProperties().get("postalcode"));
-//        super.setCountryCode(address.getCountryCode());
-        super.setCountryName((String) address.getProperties().get("country"));
-//        super.setPhone(address.getPhone());
-//        super.setUrl(address.getUrl());
-//        super.setExtras(address.getExtras());
-
-        Point p = (Point) address.getGeometry();
-        super.setLatitude(p.getCoordinates().getLatitude());
-        super.setLongitude(p.getCoordinates().getLongitude());
-
-        // Check if the geocoder marked this location as having a public transportation category
-        ArrayList<String> categories = address.getProperty("category");
-        if (categories != null) {
-            for (String category : categories) {
-                if (category.equalsIgnoreCase("transport:public")) {
-                    isTransitCategory = true;
-                    break;
-                }
-            }
-        }
     }
 
     @Override
@@ -214,16 +163,5 @@ public class CustomAddress extends Address {
         addr.setLatitude(Double.MAX_VALUE);
         addr.setLongitude(Double.MAX_VALUE);
         return addr;
-    }
-
-    /**
-     * Return true if this location has been labeled under the category of "public transportation",
-     * false if it has not
-     *
-     * @return true if this location has been labeled under the category of "public transportation",
-     * false if it has not
-     */
-    public boolean isTransitCategory() {
-        return isTransitCategory;
     }
 }

@@ -15,15 +15,16 @@
  */
 package org.onebusaway.android.util;
 
+import org.onebusaway.android.R;
+import org.onebusaway.android.app.Application;
+import org.onebusaway.android.map.MapParams;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
-
-import org.onebusaway.android.R;
-import org.onebusaway.android.app.Application;
-import org.onebusaway.android.map.MapParams;
 
 import java.util.Locale;
 
@@ -36,7 +37,12 @@ public class PreferenceUtils {
     public static void saveString(SharedPreferences prefs, String key, String value) {
         SharedPreferences.Editor edit = prefs.edit();
         edit.putString(key, value);
-        edit.apply();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+            edit.apply();
+        } else {
+            edit.commit();
+        }
     }
 
     public static void saveString(String key, String value) {
@@ -47,7 +53,12 @@ public class PreferenceUtils {
     public static void saveInt(SharedPreferences prefs, String key, int value) {
         SharedPreferences.Editor edit = prefs.edit();
         edit.putInt(key, value);
-        edit.apply();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+            edit.apply();
+        } else {
+            edit.commit();
+        }
     }
 
     public static void saveInt(String key, int value) {
@@ -58,7 +69,12 @@ public class PreferenceUtils {
     public static void saveLong(SharedPreferences prefs, String key, long value) {
         SharedPreferences.Editor edit = prefs.edit();
         edit.putLong(key, value);
-        edit.apply();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+            edit.apply();
+        } else {
+            edit.commit();
+        }
     }
 
     public static void saveLong(String key, long value) {
@@ -69,7 +85,12 @@ public class PreferenceUtils {
     public static void saveBoolean(SharedPreferences prefs, String key, boolean value) {
         SharedPreferences.Editor edit = prefs.edit();
         edit.putBoolean(key, value);
-        edit.apply();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+            edit.apply();
+        } else {
+            edit.commit();
+        }
     }
 
     public static void saveBoolean(String key, boolean value) {
@@ -80,7 +101,12 @@ public class PreferenceUtils {
     public static void saveFloat(SharedPreferences prefs, String key, float value) {
         SharedPreferences.Editor edit = prefs.edit();
         edit.putFloat(key, value);
-        edit.apply();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+            edit.apply();
+        } else {
+            edit.commit();
+        }
     }
 
     public static void saveFloat(String key, float value) {
@@ -91,7 +117,12 @@ public class PreferenceUtils {
     public static void saveDouble(SharedPreferences prefs, String key, double value) {
         SharedPreferences.Editor edit = prefs.edit();
         edit.putLong(key, Double.doubleToRawLongBits(value));
-        edit.apply();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+            edit.apply();
+        } else {
+            edit.commit();
+        }
     }
 
     @TargetApi(9)
@@ -200,26 +231,6 @@ public class PreferenceUtils {
 
     public static boolean getBoolean(String key, boolean defaultValue) {
         return Application.getPrefs().getBoolean(key, defaultValue);
-    }
-
-    /**
-     * Returns true if the user has previously indicated that they don't want to be prompted to provide
-     * location permissions. Note that this means they haven't actually be prompted with the
-     * system permission dialog.
-     */
-    public static boolean userDeniedLocationPermission() {
-        Resources r = Application.get().getResources();
-        return getBoolean(r.getString(R.string.preferences_key_user_denied_location_permissions), false);
-    }
-
-    /**
-     * Set value to true if the user has previously indicated that they don't want to be prompted to provide
-     * location permissions, or false if they have indicated that they want to be prompted with
-     * the system permission dialog.
-     */
-    public static void setUserDeniedLocationPermissions(boolean value) {
-        Resources r = Application.get().getResources();
-        saveBoolean(r.getString(R.string.preferences_key_user_denied_location_permissions), value);
     }
 
     /**

@@ -31,7 +31,7 @@ public class ObaContext {
 
     private static final String TAG = "ObaContext";
 
-    private String mApiKey = "CuandoSUBO-Android-9b8a8543-b111-4caf-80b0-b81978707a0c";
+    private String mApiKey = "v1_BktoDJ2gJlu6nLM6LsT9H8IUbWc=cGF1bGN3YXR0c0BnbWFpbC5jb20=";
 
     private int mAppVer = 0;
 
@@ -135,8 +135,8 @@ public class ObaContext {
                 // URI.parse() doesn't tell us if the scheme is missing, so use URL() instead (#126)
                 URL url = new URL(serverName);
             } catch (MalformedURLException e) {
-                // Assume HTTPS scheme, since without a scheme the Uri won't parse the authority
-                serverName = context.getString(R.string.https_prefix) + serverName;
+                // Assume HTTP scheme, since without a scheme the Uri won't parse the authority
+                serverName = context.getString(R.string.http_prefix) + serverName;
             }
 
             baseUrl = Uri.parse(serverName);

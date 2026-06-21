@@ -15,60 +15,72 @@
  * limitations under the License.
  */
 
+import groovy.swing.SwingBuilder
 import org.apache.tools.ant.filters.ConcatFilter
 
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
 
 repositories {
     maven {
         // OBA Releases - for comparator to sort alphanumeric routes
-        url "https://repo.camsys-apps.com/releases"
+        url "http://nexus.onebusaway.org/nexus/content/repositories/releases"
+    }
+    maven {
+        // for Amazon Maps
+        url uri('../.m2/repository')
     }
     maven {
         // CUTR Releases
         url "https://github.com/CUTR-at-USF/cutr-mvn-repo/raw/master/snapshots"
     }
-    mavenCentral()
-    maven { url 'https://jitpack.io' }
+    maven {
+        // for testlib
+        url "http://dl.bintray.com/acrowntest/test"
+    }
 }
 
 android {
-    compileSdk 36
+    dexOptions {
+        preDexLibraries true
+    }
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 36
-        versionCode 153
-        versionName "2.14.9"
+        minSdkVersion 16
+        targetSdkVersion 26
+        versionCode 101
+        versionName "2.4.4"
 
         multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        // This enables us to tell when we're running unit tests on CI (#1010 for Travis, #1072 for GitHub)
-        buildConfigField("String", "CI", "\"" + System.getenv('CI') + "\"")
-
-        // Configure Java compile options to specify the schema location for Room database to keep track of schema versions
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
-            }
-        }
     }
 
     /**
      * brand - how the name, look, and feel of each OneBusAway-based app is presented
-     * platform - Google
+     * platform - Google or Amazon (for Maps API v2 dependencies)
      */
-    flavorDimensions = ["brand", "platform"]
+    flavorDimensions "brand", "platform"
 
     productFlavors {
         google {
             // Normal Google Play release - see src/google
             dimension "platform"
-            isDefault = true
+        }
+
+        amazon {
+            /**
+             * Amazon Fire Phone - see src/amazon
+             *
+             * NOTE: The "copyMapsApiV2Classes" task automatically copies the classes from
+             * src/google/java/org/onebusaway/android/map package to the
+             * src/amazon/java/org/onebusaway/android/map package (with the exception of
+             * ProprietaryMapHelpV2) when the project is built, and replaces the imports and
+             * GoogleMap class with the Amazon equivalents.  Therefore, the files in
+             * src/amazon/java/org/onebusaway/android/map should not be manually changed.
+             */
+            dimension "platform"
         }
 
         oba {
@@ -80,13 +92,11 @@ android {
              * com.joulespersecond.seattlebusbot
              */
             dimension "brand"
-            isDefault = true
             applicationId "com.joulespersecond.seattlebusbot"
             manifestPlaceholders = [databaseAuthority: "com.joulespersecond.oba"]
             buildConfigField "int", "ARRIVAL_INFO_STYLE", "0" // Defined in BuildFlavorConstants
             buildConfigField "boolean", "USE_FIXED_REGION", "false" // Supports multi-region
-            buildConfigField "boolean", "USE_PELIAS_GEOCODING", "true"
-            buildConfigField "String", "PELIAS_API_KEY", "\"" + getPeliasKey(name) + "\""
+            buildConfigField "String", "EMBEDDED_SOCIAL_API_KEY", "\"" + getEmbeddedSocialApiKey(name) + "\""
             // Below fields need to be defined so flavor builds, but will not be used by app
             buildConfigField "String", "FIXED_REGION_NAME", "null"
             buildConfigField "String", "FIXED_REGION_OBA_BASE_URL", "null"
@@ -100,6 +110,7 @@ android {
             buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_DISCOVERY_APIS", "true"
             buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_REALTIME_APIS", "true"
             buildConfigField "boolean", "FIXED_REGION_SUPPORTS_SIRI_REALTIME_APIS", "false"
+            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_EMBEDDEDSOCIAL", "false"
             buildConfigField "String", "FIXED_REGION_TWITTER_URL", "null"
             buildConfigField "String", "FIXED_REGION_STOP_INFO_URL", "null"
             buildConfigField "String", "FIXED_REGION_OPEN311_JURISDICTION_ID", "null"
@@ -111,11 +122,6 @@ android {
             buildConfigField "String", "FIXED_REGION_PAYMENT_ANDROID_APP_ID", "null"
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_TITLE", "null"
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
-            buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
-            buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
-            buildConfigField "String", "FIXED_REGION_SIDECAR_BASE_URL", "\"https://onebusaway.co\""
-            buildConfigField "String", "FIXED_REGION_PLAUSIBLE_ANALYTICS_SERVER_URL", "null"
-            buildConfigField "String", "ONESIGNAL_APP_ID", ONESIGNAL_APP_ID
         }
 
         /**
@@ -134,8 +140,7 @@ android {
             manifestPlaceholders = [databaseAuthority: applicationId.toString() + '.provider']
             buildConfigField "int", "ARRIVAL_INFO_STYLE", "0"  // Defined in BuildFlavorConstants
             buildConfigField "boolean", "USE_FIXED_REGION", "false" // Supports multi-region
-            buildConfigField "boolean", "USE_PELIAS_GEOCODING", "true"
-            buildConfigField "String", "PELIAS_API_KEY", "\"" + getPeliasKey(name) + "\""
+            buildConfigField "String", "EMBEDDED_SOCIAL_API_KEY", "\"" + getEmbeddedSocialApiKey(name) + "\""
             // Below fields need to be defined so flavor builds, but will not be used by app
             buildConfigField "String", "FIXED_REGION_NAME", "null"
             buildConfigField "String", "FIXED_REGION_OBA_BASE_URL", "null"
@@ -149,6 +154,7 @@ android {
             buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_DISCOVERY_APIS", "true"
             buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_REALTIME_APIS", "true"
             buildConfigField "boolean", "FIXED_REGION_SUPPORTS_SIRI_REALTIME_APIS", "false"
+            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_EMBEDDEDSOCIAL", "false"
             buildConfigField "String", "FIXED_REGION_TWITTER_URL", "null"
             buildConfigField "String", "FIXED_REGION_STOP_INFO_URL", "null"
             buildConfigField "String", "FIXED_REGION_OPEN311_JURISDICTION_ID", "null"
@@ -160,11 +166,6 @@ android {
             buildConfigField "String", "FIXED_REGION_PAYMENT_ANDROID_APP_ID", "null"
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_TITLE", "null"
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
-            buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
-            buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
-            buildConfigField "String", "FIXED_REGION_SIDECAR_BASE_URL", "null"
-            buildConfigField "String", "FIXED_REGION_PLAUSIBLE_ANALYTICS_SERVER_URL", "null"
-            buildConfigField "String", "ONESIGNAL_APP_ID", ONESIGNAL_APP_ID
         }
 
         agencyY {
@@ -174,22 +175,22 @@ android {
             manifestPlaceholders = [databaseAuthority: applicationId.toString() + '.provider']
             buildConfigField "int", "ARRIVAL_INFO_STYLE", "1" // Defined in BuildFlavorConstants
             buildConfigField "boolean", "USE_FIXED_REGION", "true" // Does not support multi-region
-            buildConfigField "boolean", "USE_PELIAS_GEOCODING", "true"
-            buildConfigField "String", "PELIAS_API_KEY", "\"" + getPeliasKey(name) + "\""
+            buildConfigField "String", "EMBEDDED_SOCIAL_API_KEY", "\"" + getEmbeddedSocialApiKey(name) + "\""
             // Fixed region info that the app will use
-            buildConfigField "String", "FIXED_REGION_NAME", "\"Cuándo SUBO\""
+            buildConfigField "String", "FIXED_REGION_NAME", "\"Agency Y\""
             buildConfigField "String", "FIXED_REGION_OBA_BASE_URL",
-                    "\"https://cuandosubo.sube.gob.ar/onebusaway-api-webapp/\""
+                    "\"http://api.tampa.onebusaway.org/api\""
             buildConfigField "String", "FIXED_REGION_SIRI_BASE_URL", "null"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LAT", "-34.630787"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LON", "-58.401707"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LAT_SPAN", "2.0"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LON_SPAN", "2.0"
-            buildConfigField "String", "FIXED_REGION_LANG", "\"es_ES\""
-            buildConfigField "String", "FIXED_REGION_CONTACT_EMAIL", "\"soporteCuandoSubo@sube.gob.ar\""
+            buildConfigField "double", "FIXED_REGION_BOUNDS_LAT", "27.976910500000002"
+            buildConfigField "double", "FIXED_REGION_BOUNDS_LON", "-82.445851"
+            buildConfigField "double", "FIXED_REGION_BOUNDS_LAT_SPAN", "0.5424609999999994"
+            buildConfigField "double", "FIXED_REGION_BOUNDS_LON_SPAN", "0.576357999999999"
+            buildConfigField "String", "FIXED_REGION_LANG", "\"en_US\""
+            buildConfigField "String", "FIXED_REGION_CONTACT_EMAIL", "\"onebusaway@gohart.org\""
             buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_DISCOVERY_APIS", "true"
             buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_REALTIME_APIS", "true"
             buildConfigField "boolean", "FIXED_REGION_SUPPORTS_SIRI_REALTIME_APIS", "false"
+            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_EMBEDDEDSOCIAL", "false"
             buildConfigField "String", "FIXED_REGION_TWITTER_URL",
                     "\"http://mobile.twitter.com/OBA_tampa\""
             buildConfigField "String", "FIXED_REGION_STOP_INFO_URL", "null"
@@ -205,12 +206,8 @@ android {
             buildConfigField "String", "FIXED_REGION_PAYMENT_ANDROID_APP_ID", "\"co.bytemark.hart\""
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_TITLE", "null"
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
-            buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
-            buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
-            buildConfigField "String", "FIXED_REGION_SIDECAR_BASE_URL", "null"
-            buildConfigField "String", "FIXED_REGION_PLAUSIBLE_ANALYTICS_SERVER_URL", "null"
-            buildConfigField "String", "ONESIGNAL_APP_ID", ONESIGNAL_APP_ID
         }
+
         /**
          * Add more rebranding flavors here...
          */
@@ -236,7 +233,9 @@ android {
     // http://stackoverflow.com/questions/20673625/gradle-0-7-0-duplicate-files-during-packaging-of-apk
     packagingOptions {
         exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
     }
 
     lintOptions {
@@ -291,12 +290,10 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+
     testOptions {
         unitTests.includeAndroidResources true
     }
@@ -304,21 +301,51 @@ android {
     useLibrary 'android.test.runner'
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
-    namespace 'org.onebusaway.android'
 }
 
 /**
- * Gets the Pelias geocoding API key for the given product flavor
- * @param productFlavor the product flavor being built
- * @return the Pelias geocoding API key for the given product flavor
+ * Returns the Embedded Social API key from gradle.properties for the given product flavor (e.g., "oba"), or returns the empty string if the key is not found
  */
-def getPeliasKey(productFlavor) {
-    def keyName = "Pelias" + "_" + productFlavor
+def getEmbeddedSocialApiKey(productFlavor) {
+    def keyName = "EmbeddedSocialApiKey" + "_" + productFlavor
     if (project.hasProperty(keyName)) {
         return project.property(keyName)
     } else {
         return ""
     }
+}
+
+/**
+ * Copies our Maps API v2-based classes from the Google build flavor to the Amazon build flavor,
+ * replacing the Google import packages and GoogleMap class with the Amazon import packages and
+ * AmazonMap class.  Copy is only executed if the files in the google build flavor are no longer
+ * equal to the ones in the amazon build flavor.
+ */
+task copyMapsApiV2Classes {
+    inputs.dir 'src/google/java/org/onebusaway/android/map/googlemapsv2'
+    outputs.dir 'src/amazon/java/org/onebusaway/android/map/googlemapsv2'
+    // up-to-date check for outputs
+    doLast {
+        copy {
+            from 'src/google/java/org/onebusaway/android/map/googlemapsv2'
+            into 'src/amazon/java/org/onebusaway/android/map/googlemapsv2'
+            exclude { details -> details.file.name.equals('ProprietaryMapHelpV2.java') }
+            filter { line -> line.replace('com.google.android.gms.maps', 'com.amazon.geo.mapsv2') }
+            filter { line -> line.replace('GoogleMap', 'AmazonMap') }
+            filter(ConcatFilter, prepend: file('AmazonMapsFileHeader.txt'))
+        }
+    }
+}
+
+preBuild.dependsOn copyMapsApiV2Classes
+
+tasks.whenTaskAdded { theTask ->
+   // Make sure that OBA release builds always have an Embedded Social API key (#907)
+   def runningTask = project.gradle.startParameter.taskNames
+
+   if ((runningTask.toString().toLowerCase().matches("(.*)oba(.*)release(.*)") || runningTask.toString().toLowerCase().contains("assemblerelease") )  && !project.hasProperty('EmbeddedSocialApiKey_oba')) {
+        throw new InvalidUserDataException("gradle.properties must contain an EmbeddedSocialApiKey_oba API key for oba release builds")
+   }
 }
 
 // Exclude all classes from dependencies that conflict with Android platform classes (#849)
@@ -330,81 +357,47 @@ configurations {
 
 dependencies {
     // Firebase Analytics
-    implementation 'com.google.firebase:firebase-core:21.1.1'
-    implementation 'com.google.firebase:firebase-analytics:22.1.2'
-    // Plausible Analytics
-    implementation 'com.github.OneBusAway:plausible-android-sdk:3.3'
-    // Cloud Firestore (for storing destination alert test data)
-    implementation('com.google.firebase:firebase-firestore:25.1.0') {
-        // Exclude protobuf-lite and protolite-well-known-types to avoid conflicts with GTFS-realtime bindings
-        // See https://github.com/firebase/firebase-android-sdk/issues/5997
-        exclude group: 'com.google.firebase', module: 'protolite-well-known-types'
-        exclude group: 'com.google.protobuf', module: 'protobuf-javalite'
-    }
-    implementation 'com.google.firebase:firebase-auth:21.0.5'
-    implementation 'com.google.firebase:firebase-storage:21.0.1'
-    // Firebase Crashlytics
-    implementation 'com.google.firebase:firebase-crashlytics:19.2.0'
-    implementation 'com.google.firebase:firebase-crashlytics-buildtools:3.0.2'
-    // Google Play Services Location
-    implementation 'com.google.android.gms:play-services-location:21.3.0'
-    // OneSignal
-    implementation 'com.onesignal:OneSignal:5.1.38'
+    implementation 'com.google.firebase:firebase-core:16.0.8'
+    implementation 'com.google.firebase:firebase-analytics:16.4.0'
+    // Google Play Services Location (we need this on Amazon flavor too)
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
     // Support libraries
-    implementation 'androidx.activity:activity-ktx:1.9.3'
-    implementation 'androidx.fragment:fragment-ktx:1.8.4'
     implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     implementation 'android.arch.lifecycle:common-java8:1.1.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
     implementation 'commons-io:commons-io:2.4'
-    implementation 'org.apache.commons:commons-lang3:3.0'
     // Open311 client library
-    implementation 'com.github.OneBusAway:open311-client:1.0.10'
+    implementation 'edu.usf.cutr:open311client:1.0.9'
     // JSON data binding for OBA REST API responses
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.12.4'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.12.4'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.4'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.9.4'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.9.4'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.4'
     // Bottom sliding panel
     implementation 'com.sothree.slidinguppanel:library:3.3.0'
     // For floating action button speed dial
-    implementation 'com.github.OneBusAway:android-fab:2.4.1'
+    implementation ('uk.co.markormesher:android-fab:2.2.0')
     // For sorting alphanumeric route names
     implementation 'org.onebusaway.util:comparators:1.0.0'
     // For tutorial (ShowcaseView) library
     implementation 'com.github.amlcurran.showcaseview:library:5.4.3'
     // POJOs used for full data-binding via Jackson
     implementation 'edu.usf.cutr.opentripplanner.android:opentripplanner-pojos:1.0.0-SNAPSHOT'
-    // Pelias for point-of-interest search and geocoding for trip planning origin and destination
-    implementation 'com.github.OneBusAway:pelias-client-library:v1.1.0'
-    implementation 'androidx.appcompat:appcompat:1.7.0'
     // Google Play Services Maps (only for Google flavor)
-    googleImplementation 'com.google.android.gms:play-services-maps:19.0.0'
+    googleImplementation 'com.google.android.gms:play-services-maps:16.0.0'
     // Google Play Services Places is required by ProprietaryMapHelpV2 (only for Google flavor)
-    googleImplementation 'com.google.android.libraries.places:places-compat:2.6.0'
-    // Autocomplete text views with clear button for trip planning
-    implementation 'com.google.android.material:material:1.12.0'
+    googleImplementation 'com.google.android.gms:play-services-places:16.0.0'
+    // Amazon Maps (only for Amazon flavor)
+    amazonImplementation 'com.amazon.android:amazon-maps-api:2.0'
+    // Embedded Social SDK
+    implementation('com.acrowntest.test:sdk:0.7.4@aar') {
+        transitive = true
+    }
     // Required to support multidex for minSdkVersion <= 20
-    implementation 'androidx.multidex:multidex:2.0.1'
-    // Explicit dependency on Gson is now apparently needed
-    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'androidx.multidex:multidex:2.0.0'
     // Unit tests - seems like this is still necessary w/ Android X even though useLibrary is declared earlier
-    androidTestImplementation 'androidx.test:runner:1.6.2'
-    // WorkManager (Java only)
-    implementation 'androidx.work:work-runtime:2.9.1'
-    implementation "androidx.concurrent:concurrent-futures:1.2.0"
-    implementation "androidx.concurrent:concurrent-listenablefuture:1.0.0-beta01"
-    implementation "androidx.concurrent:concurrent-listenablefuture-callback:1.0.0-beta01"
-    implementation "androidx.core:core-ktx:1.13.1"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    // RoomDB
-    implementation "androidx.room:room-runtime:2.6.1"
-    kapt "androidx.room:room-compiler:2.6.1"
-    implementation "androidx.room:room-ktx:2.6.1"
-    // GTFS Realtime bindings for parsing GTFS-realtime data
-    implementation group: 'org.mobilitydata', name: 'gtfs-realtime-bindings', version: '0.0.8'
-    implementation 'com.google.api.grpc:proto-google-common-protos:2.9.0'
+    androidTestImplementation 'androidx.test:runner:1.1.0'
 }
 
 apply plugin:'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'

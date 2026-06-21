@@ -73,20 +73,15 @@
                 android:layout_marginTop="2dp"
                 android:orientation="horizontal">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:layout_marginStart="56dp"
-                android:hint="@string/report_problem_comment_hint">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/report_problem_comment"
+            <EditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:id="@+id/report_problem_comment"
+                    android:hint="@string/report_problem_comment_hint"
                     android:maxLines="4"
-                    android:lines="2"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:lines="2"
+                    style="@style/MaterialItem"/>
         </FrameLayout>
 
         <FrameLayout
@@ -101,7 +96,6 @@
                     android:text="@string/report_problem_onvehicle_bus"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="48dp"
                     style="@style/MaterialItem">
             </CheckBox>
         </FrameLayout>
@@ -113,20 +107,15 @@
                 android:layout_marginTop="2dp"
                 android:orientation="horizontal">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/report_problem_uservehicle_hint">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/report_problem_uservehicle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxLines="4"
-                android:lines="2"
-                android:layout_marginTop="2dp"
-                android:layout_marginStart="56dp" />
-            </com.google.android.material.textfield.TextInputLayout>
+            <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:id="@+id/report_problem_uservehicle"
+                    android:hint="@string/report_problem_uservehicle_hint"
+                    android:maxLines="4"
+                    android:lines="2"
+                    style="@style/MaterialItem"/>
         </FrameLayout>
 
         <FrameLayout

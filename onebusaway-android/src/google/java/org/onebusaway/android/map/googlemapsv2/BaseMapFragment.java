@@ -23,18 +23,12 @@ import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.StampStyle;
-import com.google.android.gms.maps.model.StrokeStyle;
-import com.google.android.gms.maps.model.StyleSpan;
-import com.google.android.gms.maps.model.TextureStyle;
 import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -42,7 +36,6 @@ import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
 import org.onebusaway.android.io.ObaApi;
-import org.onebusaway.android.io.PlausibleAnalytics;
 import org.onebusaway.android.io.elements.ObaReferences;
 import org.onebusaway.android.io.elements.ObaRegion;
 import org.onebusaway.android.io.elements.ObaRoute;
@@ -58,9 +51,7 @@ import org.onebusaway.android.map.StopMapController;
 import org.onebusaway.android.map.bike.BikeshareMapController;
 import org.onebusaway.android.map.googlemapsv2.bike.BikeStationOverlay;
 import org.onebusaway.android.region.ObaRegionsTask;
-import org.onebusaway.android.ui.HomeActivity;
 import org.onebusaway.android.ui.LayersSpeedDialAdapter;
-import org.onebusaway.android.ui.weather.RegionCallback;
 import org.onebusaway.android.util.LocationHelper;
 import org.onebusaway.android.util.LocationUtils;
 import org.onebusaway.android.util.PermissionUtils;
@@ -75,7 +66,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
@@ -96,13 +86,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.DialogFragment;
 
 import static org.onebusaway.android.util.PermissionUtils.LOCATION_PERMISSIONS;
 import static org.onebusaway.android.util.PermissionUtils.LOCATION_PERMISSION_REQUEST;
-import static org.onebusaway.android.util.UIUtils.canManageDialog;
 
 /**
  * The MapFragment class is split into two basic modes:
@@ -131,6 +119,8 @@ public class BaseMapFragment extends SupportMapFragment
 
     private static final int REQUEST_NO_LOCATION = 41;
 
+    private static final String USER_DENIED_PERMISSION = ".UserDeniedPermission";
+
     //
     // Location Services and Maps API v2 constants
     //
@@ -149,7 +139,6 @@ public class BaseMapFragment extends SupportMapFragment
 
     // Use fully-qualified class name to avoid import statement, because it interferes with scripted
     // copying of Maps API v2 classes between Google/Amazon build flavors (see #254)
-    // TODO: We've eliminated Amazon Fire support. Let's reverse this.
     private com.google.android.gms.maps.GoogleMap mMap;
 
     private String mFocusStopId;
@@ -200,8 +189,6 @@ public class BaseMapFragment extends SupportMapFragment
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
-    private AlertDialog locationPermissionDialog;
-
     @Override
     public void onActivateLayer(LayerInfo layer) {
         switch (layer.getLayerlabel()) {
@@ -210,8 +197,6 @@ public class BaseMapFragment extends SupportMapFragment
                     if (controller instanceof BikeshareMapController) {
                         ((BikeshareMapController) controller).showBikes(true);
                         ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                                Application.get().getPlausibleInstance(),
-                                PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                                 getString(R.string.analytics_layer_bikeshare),
                                 getString(R.string.analytics_label_bikeshare_activated));
                     }
@@ -229,8 +214,6 @@ public class BaseMapFragment extends SupportMapFragment
                     if (controller instanceof BikeshareMapController) {
                         ((BikeshareMapController) controller).showBikes(false);
                         ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                                Application.get().getPlausibleInstance(),
-                                PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                                 getString(R.string.analytics_layer_bikeshare),
                                 getString(R.string.analytics_label_bikeshare_deactivated));
                     }
@@ -278,7 +261,6 @@ public class BaseMapFragment extends SupportMapFragment
 
         /**
          * Called when a result has been obtained after requesting user location permission.
-         *
          * @param grantResult The grant results for the location permission which is either PackageManager.PERMISSION_GRANTED or PackageManager.PERMISSION_DENIED. Never null.
          */
         void onLocationPermissionResult(int grantResult);
@@ -295,7 +277,9 @@ public class BaseMapFragment extends SupportMapFragment
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
 
-        mUserDeniedPermission = PreferenceUtils.userDeniedLocationPermission();
+        if (savedInstanceState != null) {
+            savedInstanceState.getBoolean(USER_DENIED_PERMISSION, false);
+        }
 
         mLocationHelper = new LocationHelper(getActivity());
 
@@ -338,30 +322,17 @@ public class BaseMapFragment extends SupportMapFragment
         mMap.setOnMarkerClickListener(mapClickListeners);
         mMap.setOnMapClickListener(mapClickListeners);
 
-        if (inDarkMode()) {
-            mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(getContext(), R.raw.dark_map));
-        } else {
-            // When in light mode, just remove POIs.
-            String removePOIStyle = "[{\"featureType\":\"poi\",\"elementType\":\"all\",\"stylers\":[{\"visibility\":\"off\"}]}]";
-            mMap.setMapStyle(new MapStyleOptions(removePOIStyle));
-        }
-
         initMap(mLastSavedInstanceState);
-    }
-
-    private boolean inDarkMode() {
-        return AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES || (
-                AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_NO &&
-                        (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-        );
     }
 
     private void initMap(Bundle savedInstanceState) {
         UiSettings uiSettings = mMap.getUiSettings();
-        mUserDeniedPermission = PreferenceUtils.userDeniedLocationPermission();
 
         if (!mUserDeniedPermission) {
             requestPermissionAndInit(getActivity());
+        } else {
+            // Explain permission to user
+            UIUtils.showLocationPermissionDialog(this);
         }
 
         // Set location source
@@ -372,8 +343,6 @@ public class BaseMapFragment extends SupportMapFragment
         uiSettings.setMyLocationButtonEnabled(false);
         // Hide Toolbar
         uiSettings.setMapToolbarEnabled(false);
-        // Check for map mode settings
-        updateMapModeSettings();
         // Instantiate class that holds generic markers to be added by outside classes
         mSimpleMarkerOverlay = new SimpleMarkerOverlay(mMap);
 
@@ -393,8 +362,6 @@ public class BaseMapFragment extends SupportMapFragment
             }
             initMapState(args);
         }
-
-
     }
 
     private void initMapState(Bundle args) {
@@ -417,14 +384,14 @@ public class BaseMapFragment extends SupportMapFragment
 
     @SuppressLint("MissingPermission")
     private void requestPermissionAndInit(final Activity activity) {
-        if (PermissionUtils.hasGrantedAtLeastOnePermission(activity, LOCATION_PERMISSIONS)) {
+        if (PermissionUtils.hasGrantedPermissions(activity, LOCATION_PERMISSIONS)) {
             // Show the location on the map
             mMap.setMyLocationEnabled(true);
             // Make sure location helper is registered
             mLocationHelper.registerListener(this);
         } else {
-            // Explain permission to user
-            showLocationPermissionDialog();
+            // Request permissions from the user
+            requestPermissions(LOCATION_PERMISSIONS, LOCATION_PERMISSION_REQUEST);
         }
     }
 
@@ -444,13 +411,8 @@ public class BaseMapFragment extends SupportMapFragment
             } else {
                 mUserDeniedPermission = true;
             }
-        } else if (HomeActivity.BATTERY_OPTIMIZATIONS_PERMISSION_REQUEST == requestCode) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                UIUtils.openBatteryIgnoreIntent(getActivity());
-            }
         }
-
-        if (requestCode == LOCATION_PERMISSION_REQUEST && mOnLocationPermissionResultListener != null) {
+        if (mOnLocationPermissionResultListener != null) {
             mOnLocationPermissionResultListener.onLocationPermissionResult(result);
         }
     }
@@ -504,7 +466,6 @@ public class BaseMapFragment extends SupportMapFragment
 
     @Override
     public void onResume() {
-        mUserDeniedPermission = PreferenceUtils.userDeniedLocationPermission();
         if (mLocationHelper != null) {
             mLocationHelper.onResume();
         }
@@ -516,7 +477,7 @@ public class BaseMapFragment extends SupportMapFragment
                 controller.notifyMapChanged();
             }
         }
-        updateMapModeSettings();
+
         super.onResume();
     }
 
@@ -539,6 +500,7 @@ public class BaseMapFragment extends SupportMapFragment
         outState.putInt(MapParams.MAP_PADDING_TOP, mMapPaddingTop);
         outState.putInt(MapParams.MAP_PADDING_RIGHT, mMapPaddingRight);
         outState.putInt(MapParams.MAP_PADDING_BOTTOM, mMapPaddingBottom);
+        outState.putBoolean(USER_DENIED_PERMISSION, mUserDeniedPermission);
     }
 
     @Override
@@ -730,8 +692,6 @@ public class BaseMapFragment extends SupportMapFragment
         // Make sure that the stop overlay has been successfully initialized
         if (setupStopOverlay() && stops != null) {
             mStopOverlay.populateStops(stops, refs);
-            // When we have stops that means we have a valid region to get the weather
-            checkRegionWeather(false);
         }
     }
 
@@ -755,13 +715,12 @@ public class BaseMapFragment extends SupportMapFragment
         //Otherwise, its premature since we don't know the device's relationship to
         //available OBA regions or the manually set API region
         String serverName = Application.get().getCustomApiUrl();
-        if (mWarnOutOfRange && (Application.get().getCurrentRegion() != null || !TextUtils.isEmpty(serverName))) {
-            if (mRunning && canManageDialog(getActivity())) {
+        if (mWarnOutOfRange && (Application.get().getCurrentRegion() != null || !TextUtils
+                .isEmpty(serverName))) {
+            if (mRunning && UIUtils.canManageDialog(getActivity())) {
                 showDialog(MapDialogFragment.OUTOFRANGE_DIALOG);
             }
         }
-        // Notify weather view that we are out of range
-        checkRegionWeather(true);
     }
 
     //
@@ -787,7 +746,6 @@ public class BaseMapFragment extends SupportMapFragment
                 setMyLocation(true, false);
             } else {
                 zoomToRegion();
-                checkRegionWeather(false);
             }
         }
     }
@@ -861,16 +819,15 @@ public class BaseMapFragment extends SupportMapFragment
 
         Location lastLocation = Application.getLastKnownLocation(getActivity(), apiClient);
         if (lastLocation == null) {
-            if (!PermissionUtils.hasGrantedAtLeastOnePermission(Application.get(), LOCATION_PERMISSIONS)) {
-                if (!PreferenceUtils.userDeniedLocationPermission()) {
-                    requestPermissionAndInit(getActivity());
-                }
+            String text;
+            if (!PermissionUtils.hasGrantedPermissions(Application.get(), LOCATION_PERMISSIONS)) {
+                text = getResources().getString(R.string.no_location_permission);
             } else {
-                Toast.makeText(getActivity(),
-                        getResources().getString(R.string.main_waiting_for_location),
-                        Toast.LENGTH_SHORT).show();
-
+                text = getResources().getString(R.string.main_waiting_for_location);
             }
+            Toast.makeText(getActivity(),
+                    text,
+                    Toast.LENGTH_SHORT).show();
             return false;
         }
 
@@ -923,22 +880,6 @@ public class BaseMapFragment extends SupportMapFragment
         }
     }
 
-    private RegionCallback regionCallback;
-
-    public void setRegionCallback(RegionCallback callback) {
-        this.regionCallback = callback;
-    }
-
-    public void checkRegionWeather(boolean isOutOfRange) {
-        // If we have a valid region, callback to home activity to get the weather.
-        ObaRegion region = Application.get().getCurrentRegion();
-        boolean isValid = (region != null && mMap != null && !isOutOfRange);
-
-        if (regionCallback != null) {
-            regionCallback.onValidRegion(isValid);
-        }
-    }
-
     @Override
     public Location getSouthWest() {
         if (mMap != null) {
@@ -977,7 +918,7 @@ public class BaseMapFragment extends SupportMapFragment
             // If we don't even have a response object, something went really wrong
             code = ObaApi.OBA_INTERNAL_ERROR;
         }
-        if (canManageDialog(context)) {
+        if (UIUtils.canManageDialog(context)) {
             Toast.makeText(context,
                     context.getString(UIUtils.getMapErrorString(context, code)),
                     Toast.LENGTH_LONG).show();
@@ -1080,14 +1021,12 @@ public class BaseMapFragment extends SupportMapFragment
                 mLineOverlay.clear();
             }
             PolylineOptions lineOptions;
-            StampStyle polylineArrow = TextureStyle.newBuilder(BitmapDescriptorFactory.fromResource(R.drawable.ic_navigation_expand_more)).build();
-            StyleSpan polylineArrowSpan = new StyleSpan(StrokeStyle.colorBuilder(lineOverlayColor).stamp(polylineArrow).build());
 
             int totalPoints = 0;
 
             for (ObaShape s : shapes) {
                 lineOptions = new PolylineOptions();
-                lineOptions.addSpan(polylineArrowSpan);
+                lineOptions.color(lineOverlayColor);
 
                 for (Location l : s.getPoints()) {
                     lineOptions.add(MapHelpV2.makeLatLng(l));
@@ -1368,7 +1307,6 @@ public class BaseMapFragment extends SupportMapFragment
                             (dialog, which) -> {
                                 if (mMapFragment != null && mMapFragment.isAdded()) {
                                     mMapFragment.zoomToRegion();
-                                    mMapFragment.checkRegionWeather(false);
                                 }
                             }
                     )
@@ -1419,44 +1357,6 @@ public class BaseMapFragment extends SupportMapFragment
     }
 
     /**
-     * Shows the dialog to explain why location permissions are needed.  If this provided activity
-     * can't manage dialogs then this method is a no-op.
-     * <p>
-     * NOTE - this dialog can't be managed under the old dialog framework as the method
-     * ActivityCompat.shouldShowRequestPermissionRationale() always returns false.
-     */
-    public void showLocationPermissionDialog() {
-        if (!canManageDialog(getActivity())) {
-            return;
-        }
-        if (locationPermissionDialog != null && locationPermissionDialog.isShowing()) {
-            return;
-        }
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.location_permissions_title)
-                .setMessage(R.string.location_permissions_message)
-                .setCancelable(false)
-                .setPositiveButton(R.string.ok,
-                        (dialog, which) -> {
-                            PreferenceUtils.setUserDeniedLocationPermissions(false);
-                            // Request permissions from the user
-                            requestPermissions(LOCATION_PERMISSIONS, LOCATION_PERMISSION_REQUEST);
-                        }
-                )
-                .setNegativeButton(R.string.no_thanks,
-                        (dialog, which) -> {
-                            if (mOnLocationPermissionResultListener != null) {
-                                mUserDeniedPermission = true;
-                                PreferenceUtils.setUserDeniedLocationPermissions(true);
-                                mOnLocationPermissionResultListener.onLocationPermissionResult(PackageManager.PERMISSION_DENIED);
-                            }
-                        }
-                );
-        locationPermissionDialog = builder.create();
-        locationPermissionDialog.show();
-    }
-
-    /**
      * Class responsible for listening to the clicks on the map or markers and propagating these
      * clicks to the overlays visible on the map.
      */
@@ -1496,61 +1396,4 @@ public class BaseMapFragment extends SupportMapFragment
             return false;
         }
     }
-
-    /**
-     * Updates the map settings based on the current state of map mode preference.
-     */
-    private void updateMapModeSettings() {
-        if (mMap == null) return;
-
-        String normal2D = getString(R.string.preferences_preferred_map_option_normal2d);
-        String normal3D = getString(R.string.preferences_preferred_map_option_normal3d);
-        String satellite = getString(R.string.preferences_preferred_map_option_satellite);
-
-        String mapType = Application.getPrefs().getString(getString(R.string.preference_key_map_mode), normal2D);
-
-        if (mapType.equals(normal2D)) {
-            setMapType(GoogleMap.MAP_TYPE_NORMAL, false, false);
-        } else if (mapType.equals(normal3D)) {
-            if (mMap.getMapType() == GoogleMap.MAP_TYPE_HYBRID) {
-                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-            }
-            setMapType(GoogleMap.MAP_TYPE_NORMAL, true, true);
-        } else if (mapType.equals(satellite)) {
-            setMapType(GoogleMap.MAP_TYPE_HYBRID, false, false);
-        } else {
-            return; // Should never happen
-        }
-
-        resetCameraTilt();
-    }
-
-    /**
-     * Sets the map type, tilt gestures, and 3D buildings visibility for the Google Map.
-     *
-     * @param type The map type to be set. Can be one of the following constants:
-     *             - GoogleMap.MAP_TYPE_NORMAL
-     *             - GoogleMap.MAP_TYPE_HYBRID
-     * @param tiltEnabled A boolean value to determine whether tilt gestures are enabled on the map.
-     * @param buildingsEnabled A boolean value that determines whether 3D buildings are enabled on the map.
-     */
-    private void setMapType(int type, boolean tiltEnabled, boolean buildingsEnabled) {
-        mMap.setMapType(type);
-        mMap.getUiSettings().setTiltGesturesEnabled(tiltEnabled);
-        mMap.setBuildingsEnabled(buildingsEnabled);
-    }
-
-    /**
-     * Resets camera tilt to defaults (0 degrees)
-     */
-    private void resetCameraTilt() {
-        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(
-                new CameraPosition.Builder()
-                        .target(mMap.getCameraPosition().target)
-                        .zoom(mMap.getCameraPosition().zoom)
-                        .tilt(0)
-                        .build()
-        ));
-    }
-
 }

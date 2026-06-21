@@ -15,6 +15,15 @@
  */
 package org.onebusaway.android.ui;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
+import org.onebusaway.android.R;
+import org.onebusaway.android.app.Application;
+import org.onebusaway.android.io.ObaAnalytics;
+import org.onebusaway.android.provider.ObaContract;
+import org.onebusaway.android.util.PreferenceUtils;
+import org.onebusaway.android.util.ShowcaseViewUtils;
+
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
@@ -34,16 +43,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
-
-import com.google.firebase.analytics.FirebaseAnalytics;
-
-import org.onebusaway.android.R;
-import org.onebusaway.android.app.Application;
-import org.onebusaway.android.io.ObaAnalytics;
-import org.onebusaway.android.io.PlausibleAnalytics;
-import org.onebusaway.android.provider.ObaContract;
-import org.onebusaway.android.util.PreferenceUtils;
-import org.onebusaway.android.util.ShowcaseViewUtils;
 
 public class MyStarredStopsFragment extends MyStopListFragmentBase {
 
@@ -102,11 +101,11 @@ public class MyStarredStopsFragment extends MyStopListFragmentBase {
         }
         if (mAdapter.getCount() > 0) {
             ShowcaseViewUtils.showTutorial(ShowcaseViewUtils.TUTORIAL_STARRED_STOPS_SHORTCUT,
-                    (AppCompatActivity) getActivity(), null, false);
+                    (AppCompatActivity) getActivity(), null);
         }
         if (mAdapter.getCount() > 1) {
             ShowcaseViewUtils.showTutorial(ShowcaseViewUtils.TUTORIAL_STARRED_STOPS_SORT,
-                    (AppCompatActivity) getActivity(), null, false);
+                    (AppCompatActivity) getActivity(), null);
         }
     }
 
@@ -187,8 +186,6 @@ public class MyStarredStopsFragment extends MyStopListFragmentBase {
                 Log.d(TAG, "Sort by name");
                 sortBy = ObaContract.Stops.UI_NAME + " asc";
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                        Application.get().getPlausibleInstance(),
-                        PlausibleAnalytics.REPORT_STARRED_STOPS_EVENT_URL,
                         getString(R.string.analytics_label_sort_by_name_stops),
                         null);
                 break;
@@ -197,8 +194,6 @@ public class MyStarredStopsFragment extends MyStopListFragmentBase {
                 Log.d(TAG, "Sort by frequently used");
                 sortBy = ObaContract.Stops.USE_COUNT + " desc";
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                        Application.get().getPlausibleInstance(),
-                        PlausibleAnalytics.REPORT_STARRED_STOPS_EVENT_URL,
                         getString(R.string.analytics_label_sort_by_mfu_stops),
                         null);
                 break;
@@ -216,17 +211,11 @@ public class MyStarredStopsFragment extends MyStopListFragmentBase {
     }
 
     public static class ClearDialog extends ClearConfirmDialog {
-        
-        public ClearDialog() {
-            super(R.string.my_option_clear_starred_stops_confirm, R.string.my_option_clear_starred_stops_title);
-        }
 
         @Override
         protected void doClear() {
             ObaContract.Stops.markAsFavorite(getActivity(), ObaContract.Stops.CONTENT_URI, false);
             ObaAnalytics.reportUiEvent(FirebaseAnalytics.getInstance(getContext()),
-                    Application.get().getPlausibleInstance(),
-                    PlausibleAnalytics.REPORT_BOOKMARK_EVENT_URL,
                     getString(R.string.analytics_label_edit_field_bookmark_delete),
                     null);
         }

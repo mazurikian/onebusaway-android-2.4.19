@@ -15,18 +15,14 @@
  */
 package org.onebusaway.android.io;
 
-import android.content.SharedPreferences;
-import android.location.Location;
-import android.os.Bundle;
-import android.util.Log;
-
-import com.google.firebase.Firebase;
 import com.google.firebase.analytics.FirebaseAnalytics;
-
-import com.onebusaway.plausible.android.Plausible;
 
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
+
+import android.content.SharedPreferences;
+import android.location.Location;
+import android.os.Bundle;
 
 import static android.text.TextUtils.isEmpty;
 
@@ -76,11 +72,10 @@ public class ObaAnalytics {
     /**
      * Reports UI events using Firebase
      * @param analytics Firebase singleton
-     * @param pageURl URL of the page where the UI element is located for plausible analytics
      * @param id ID of the UI element to report
      * @param state the state or variant of the UI item, or null if the item doesn't have a state or variant
      */
-    public static void reportUiEvent(FirebaseAnalytics analytics, Plausible plausible, String pageURl, String id, String state) {
+    public static void reportUiEvent(FirebaseAnalytics analytics, String id, String state) {
         if (!isAnalyticsActive()) {
             return;
         }
@@ -90,7 +85,6 @@ public class ObaAnalytics {
             bundle.putString(FirebaseAnalytics.Param.ITEM_VARIANT, state);
         }
         analytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
-        PlausibleAnalytics.reportUiEvent(plausible, pageURl, id, state);
     }
 
     /**
@@ -112,11 +106,10 @@ public class ObaAnalytics {
 
     /**
      * Reports Search events using Firebase
-     * @param plausible Plausible analytics
      * @param analytics Firebase singleton
      * @param searchTerm search term used, or null if unknown
      */
-    public static void reportSearchEvent(Plausible plausible, FirebaseAnalytics analytics, String searchTerm) {
+    public static void reportSearchEvent(FirebaseAnalytics analytics, String searchTerm) {
         if (!isAnalyticsActive()) {
             return;
         }
@@ -126,20 +119,18 @@ public class ObaAnalytics {
             bundle.putString(FirebaseAnalytics.Param.SEARCH_TERM, searchTerm);
         }
         analytics.logEvent(FirebaseAnalytics.Event.SEARCH, bundle);
-        PlausibleAnalytics.reportSearchEvent(plausible, searchTerm);
     }
 
     /**
      * Reports the distance between bus stop location and device current location
      *
      * @param analytics Firebase singleton
-     * @param plausible Plausible analytics
      * @param stopId       bus stop ID
      * @param stopName bus stop name
      * @param myLocation   the device location
      * @param stopLocation bus stop location
      */
-    public static void reportViewStopEvent(Plausible plausible, FirebaseAnalytics analytics, String stopId, String stopName, Location myLocation, Location stopLocation) {
+    public static void reportViewStopEvent(FirebaseAnalytics analytics, String stopId, String stopName, Location myLocation, Location stopLocation) {
         if (!isAnalyticsActive() || myLocation == null) {
             return;
         }
@@ -165,7 +156,7 @@ public class ObaAnalytics {
                 stopDistance = ObaStopDistance.DISTANCE_8;
             }
 
-            reportViewStopEvent(plausible, analytics, stopId, stopName, stopDistance.toString());
+            reportViewStopEvent(analytics, stopId, stopName, stopDistance.toString());
         }
     }
 
@@ -177,7 +168,7 @@ public class ObaAnalytics {
      * @param stopName        Name of the stop
      * @param proximityToStopCategory a label indicating the proximity of the user to the stop
      */
-    private static void reportViewStopEvent(Plausible plausible, FirebaseAnalytics analytics, String stopId, String stopName, String proximityToStopCategory) {
+    private static void reportViewStopEvent(FirebaseAnalytics analytics, String stopId, String stopName, String proximityToStopCategory) {
         if (!isAnalyticsActive()) {
             return;
         }
@@ -185,9 +176,8 @@ public class ObaAnalytics {
         bundle.putString(FirebaseAnalytics.Param.ITEM_ID, stopId);
         bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, stopName);
         bundle.putString(FirebaseAnalytics.Param.ITEM_CATEGORY, Application.get().getString(R.string.analytics_label_stop_category));
-        bundle.putString(FirebaseAnalytics.Param.LOCATION_ID, proximityToStopCategory);
+        bundle.putString(FirebaseAnalytics.Param.ITEM_LOCATION_ID, proximityToStopCategory);
         analytics.logEvent(FirebaseAnalytics.Event.VIEW_ITEM, bundle);
-        PlausibleAnalytics.reportViewStopEvent(plausible, stopId, proximityToStopCategory);
     }
 
     /**
@@ -195,7 +185,7 @@ public class ObaAnalytics {
      * @param analytics Firebase singleton
      * @param regionName name of the region that was selected
      */
-    public static void setRegion(Plausible plausible, FirebaseAnalytics analytics, String regionName) {
+    public static void setRegion(FirebaseAnalytics analytics, String regionName) {
         if (!isAnalyticsActive()) {
             return;
         }
@@ -254,32 +244,5 @@ public class ObaAnalytics {
     private static Boolean isAnalyticsActive() {
         SharedPreferences settings = Application.getPrefs();
         return settings.getBoolean(Application.get().getString(R.string.preferences_key_analytics), Boolean.TRUE);
-    }
-
-    /**
-     * Reports destination reminder feedback using Firebase
-     * @param analytics Firebase singleton
-     * @param wasGoodReminder true if the user responded that they got the reminder at the right time, or false if they responded that they did not get the reminder at the right time
-     * @param feedbackText plain text feedback submitted by the user, or null if the user didn't enter any feedback text
-     * @param fileName the name of the file that was uploaded that contains the data for this particular trip, or null if the user didn't upload data
-     */
-    public static void reportDestinationReminderFeedback(FirebaseAnalytics analytics, boolean wasGoodReminder, String feedbackText, String fileName) {
-        if (!isAnalyticsActive()) {
-            return;
-        }
-        Bundle bundle = new Bundle();
-        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, Application.get().getString(R.string.analytics_label_button_press_destination_reminder_feedback));
-        if (wasGoodReminder) {
-            bundle.putString(FirebaseAnalytics.Param.ITEM_VARIANT, Application.get().getString(R.string.analytics_label_destination_reminder_yes));
-        } else {
-            bundle.putString(FirebaseAnalytics.Param.ITEM_VARIANT, Application.get().getString(R.string.analytics_label_destination_reminder_no));
-        }
-        if (!isEmpty(feedbackText)) {
-            bundle.putString(FirebaseAnalytics.Param.CONTENT, feedbackText);
-        }
-        if (!isEmpty(fileName)) {
-            bundle.putString(FirebaseAnalytics.Param.LOCATION_ID, fileName);
-        }
-        analytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
     }
 }

@@ -15,31 +15,6 @@
 */
 package org.onebusaway.android.report.ui;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
-import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.Window;
-import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.Spinner;
-import android.widget.TextView;
-
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.elements.ObaArrivalInfo;
@@ -63,6 +38,28 @@ import org.onebusaway.android.util.PreferenceUtils;
 import org.onebusaway.android.util.ShowcaseViewUtils;
 import org.opentripplanner.routing.bike_rental.BikeRentalStation;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.Window;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,6 +67,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import edu.usf.cutr.open311client.Open311;
 import edu.usf.cutr.open311client.Open311Manager;
 import edu.usf.cutr.open311client.models.Service;
@@ -944,7 +943,7 @@ public class InfrastructureIssueActivity extends BaseReportActivity implements
                     && ServiceUtils.isTransitOpen311ServiceByType(selectedService.getType())) {
                 ShowcaseViewUtils
                         .showTutorial(ShowcaseViewUtils.TUTORIAL_SEND_FEEDBACK_OPEN311_CATEGORIES,
-                                this, null, false);
+                                this, null);
             }
         }
     }

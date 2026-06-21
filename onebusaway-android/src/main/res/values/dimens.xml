@@ -28,8 +28,7 @@
 
     <!-- Floating action button (FAB) dimensions -->
     <dimen name="fab_size">56dp</dimen>
-    <dimen name="fab_margin_vertical">32dp</dimen>
-    <dimen name="fab_margin_horizontal">16dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 
     <!-- Shadows, for FAB on platforms before Lollipop -->
     <dimen name="fab_shadow_size_1">@dimen/fab_size</dimen>
@@ -62,15 +61,14 @@
 
     <!-- Arrivals Style B -->
     <dimen name="arrival_style_b_status_min_width">77dp</dimen>
-    <dimen name="arrival_style_b_status_min_width_small">55dp</dimen>
 
     <!-- Trip details - transit stop and line -->
     <dimen name="trip_details_transit_line_width">3dp</dimen>
+    <dimen name="trip_details_transit_line_height">65dp</dimen>
     <dimen name="trip_details_transit_stop_width">13dp</dimen>
     <dimen name="trip_details_transit_stop_width_focused">16dp</dimen>
     <dimen name="trip_details_transit_bus_icon">18dp</dimen>
     <dimen name="trip_details_transit_stop_icon">18dp</dimen>
-    <dimen name="trip_details_dest_stop_icon">18dp</dimen>
 
     <!-- Map -->
     <dimen name="map_stop_icon_size">19dp</dimen>

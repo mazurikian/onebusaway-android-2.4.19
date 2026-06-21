@@ -74,9 +74,9 @@ public class LocationHelper implements com.google.android.gms.location.LocationL
 
     private static final int MILLISECONDS_PER_SECOND = 1000;
 
-    private static final int UPDATE_INTERVAL_IN_SECONDS = 5;
+    public static final int UPDATE_INTERVAL_IN_SECONDS = 5;
 
-    private long UPDATE_INTERVAL =
+    private static final long UPDATE_INTERVAL =
             MILLISECONDS_PER_SECOND * UPDATE_INTERVAL_IN_SECONDS;
 
     private static final int FASTEST_INTERVAL_IN_SECONDS = 1;
@@ -99,19 +99,6 @@ public class LocationHelper implements com.google.android.gms.location.LocationL
     }
 
     /**
-     *
-     * @param context
-     * @param interval Faster interval in seconds.
-     */
-    public LocationHelper(Context context, int interval) {
-        mContext = context;
-        UPDATE_INTERVAL = interval*MILLISECONDS_PER_SECOND;
-        mLocationManager = (LocationManager) Application.get().getBaseContext()
-                .getSystemService(Context.LOCATION_SERVICE);
-        setupGooglePlayServices();
-    }
-
-    /**
      * Registers the provided listener for location updates, but first checks to see if Location
      * permissions are granted.  If permissions haven't been granted, returns false and does not
      * register any listeners.  After the caller has received permission from the user it can
@@ -121,7 +108,7 @@ public class LocationHelper implements com.google.android.gms.location.LocationL
      * permissions have not been granted and no listener was registered
      */
     public synchronized boolean registerListener(Listener listener) {
-        if (!PermissionUtils.hasGrantedAtLeastOnePermission(mContext, LOCATION_PERMISSIONS)) {
+        if (!PermissionUtils.hasGrantedPermissions(mContext, LOCATION_PERMISSIONS)) {
             return false;
         }
         // User has granted permissions - continue to register listener for location updates

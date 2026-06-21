@@ -3,7 +3,7 @@
 There are two ways to deploy OneBusAway Android in your city:
 
 1. **Join the OneBusAway [multi-region project](https://github.com/OneBusAway/onebusaway/wiki/Multi-Region)** - The easiest way to get started - simply set up your own OneBusAway server with your own transit data, and get added to *all* the OneBusAway apps!  See [this page](https://github.com/OneBusAway/onebusaway/wiki/Multi-Region) for details.
-2. **Deploy a rebranded version of OneBusAway Android as your own app on Google Play** - Requires a bit more maintenance, but it allows you to set up your own app on Google Play based on the OneBusAway Android source code, and with your brand name and colors.  This page discusses this option in detail.
+2. **Deploy a rebranded version of OneBusAway Android as your own app on Google Play** - Requires a bit more maintenance, but it allows you to set up your own app on Google Play / Amazon App Store based on the OneBusAway Android source code, and with your brand name and colors.  This page discusses this option in detail.
 
 ## Rebranding Using Gradle Build Flavors
 
@@ -12,6 +12,7 @@ We use [Gradle build flavors](http://developer.android.com/tools/building/config
 We have two Gradle "platform" flavor dimensions:
 
 * **google** = Normal Google Play release
+* **amazon** = Amazon Fire Phone release
 
 ...and three Gradle "brand" flavor dimensions:
 
@@ -29,9 +30,9 @@ And here are screenshots for these 3 brands:
 
 <img src="https://cloud.githubusercontent.com/assets/928045/23876835/a6ceb718-0815-11e7-866a-5daef01d0a08.png" width="496" height="281" align=center />
 
-Each of the 3 brands are deployed as an independent app on Google Play (using the **google** platform flavor).
+Each of the 3 brands are deployed as an independent app on Google Play (using the **google** platform flavor) and the Amazon App Store (using the **amazon** platform flavor).
 
-When building the project, this results in a total of 1 platform * 3 brands = 3 core build variants.  Each of these core variants also has a debug/release build type - the end result is that you'll have 6 build variants to choose from within Android Studio or on the command line.
+When building the project, this results in a total of 2 platforms * 3 brands = 6 core build variants.  Each of these core variants also has a debug/release build type - the end result is that you'll have 12 build variants to choose from within Android Studio or on the command line.
 
 To build a variant, you need to combine the platform flavor with the brand flavor.  For example, the original OneBusAway brand for the Google platform can be build with:
 
@@ -75,9 +76,8 @@ We provide a few configuration options in `build.gradle` brand flavor definition
 **Arrival Information**
 
 Valid values are `0` and `1` - The default way that estimated arrival information is shown to the user.  There are two options, as defined in `BuildFlavorConstants`:
-
-* `ARRIVAL_INFO_STYLE_A = 0` - The original OneBusAway presentation of arrival info to the user, with small rows sorted by estimated arrival time
-* `ARRIVAL_INFO_STYLE_B = 1` - The presentation of arrival info created by York Region Transit/VIVA for their forked version of OBA, which groups arrival times by route, and shows scheduled arrival times - see [their apps here](http://www.yorkregiontransit.com/en/ridingwithus/apps.asp)
+    * `ARRIVAL_INFO_STYLE_A = 0` - The original OneBusAway presentation of arrival info to the user, with small rows sorted by estimated arrival time
+    * `ARRIVAL_INFO_STYLE_B = 1` - The presentation of arrival info created by York Region Transit/VIVA for their forked version of OBA, which groups arrival times by route, and shows scheduled arrival times - see [their apps here](http://www.yorkregiontransit.com/en/ridingwithus/apps.asp)
 
 No matter which default is defined, users can change the sorting style by using the "Sort by" button in the action bar.
 
@@ -86,25 +86,6 @@ No matter which default is defined, users can change the sorting style by using 
 **Fixed vs. Multi-region**
 
 `USE_FIXED_REGION` - Valid values are `true` and `false` - If true, then the app will be fixed to the region information provided for this brand dimension in the `build.gradle`.  If false, then the app will function with the normal multi-region process, and work across various regions defined in the Regions API.  This value is false for the original OneBusAway brand so it supports multi-region.
-
-**Google Places SDK vs. Pelias geocoder for trip planning**
-
-`USE_PELIAS_GEOCODING` defines which software is used for searching for origins and destinations while trip planning (e.g., returning a latitude and longitude for a search for `airport`). Note that this doesn't affect the trip planner itself - OpenTripPlanner is always used to plan an itinerary from one latitude and longitude to another.
-
-Valid values are `true` and `false`:
-
-* `USE_PELIAS_GEOCODING = true` - The [Pelias geocoder](https://github.com/pelias/pelias) (configured for [geocode.earth](https://geocode.earth/) by default) will be used to search for origins and destinations when planning a trip. You must also set the Pelias API key in `gradle.properties` (see below).
-* `USE_PELIAS_GEOCODING = false` - The [Google Places SDK for Android](https://developers.google.com/places/android-sdk/intro) will be used to search for origins and destinations when planning a trip. Note that you'll need to set up your own billing account with the [Google Maps Platform](https://developers.google.com/maps/gmp-get-started) and configure that account for your app release signature.
-
-If `USE_PELIAS_GEOCODING = true`, you'll need to provide an API key (by default for [geocode.earth](https://geocode.earth/)).
-
-Add the following to `onebusaway-android/gradle.properties`:
-
-`Pelias_oba=XXXXXX`
-
-...where `XXXXXX` is your API key. Note that you'll need to change the suffix of `_oba` to match the name of your build flavor.
-
-Note that if you want to use a different Pelias server other than [geocode.earth](https://geocode.earth/) you can change the base Pelias URL being used by overriding the resource string `pelias_api_url` in `donottranslate.xml` (see above for examples of how to override string resources in your build flavor).
 
 ## Examples
 
@@ -149,7 +130,3 @@ The Agency Y sample has chosen different options - they are using `ARRIVAL_INFO_
     }
 
 Note that all brands need to supply the `FIXED_REGION_...` fields in their flavor dimension in `build.gradle` so the project will compile, although these values are only used if `USE_FIXED_REGION` is set to true.
-
-## Acknowledgements
-
-When launching a rebranded version of OneBusAway, acknowledging that your app is based on the hard work of those contributing to the OneBusAway project is certainly appreciated.  However, please do not imply that the OneBusAway project or it's contributors endorse the rebranded app, and please do not use the OneBusAway logo or color scheme in your rebranded app.

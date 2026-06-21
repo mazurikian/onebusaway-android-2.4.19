@@ -68,17 +68,6 @@ public interface ObaRegion {
     public String getObaBaseUrl();
 
     /**
-     * @return The Sidecar Base URL for this region, or null if it doesn't have a sideCar URL.
-     */
-
-    public String getSidecarBaseUrl();
-
-     /**
-     * @return The plausible analytics server URL for this region, or null if it doesn't have a plausible analytics server URL.
-     */
-    public String getPlausibleAnalyticsServerUrl();
-
-    /**
      * @return The base SIRI URL for this region, or null if it doesn't use SIRI.
      */
     public String getSiriBaseUrl();
@@ -164,14 +153,4 @@ public interface ObaRegion {
      * @return The body text of a warning dialog that should be shown to the user the first time they select the fare payment option, or empty if no warning should be shown to the user.
      */
     String getPaymentWarningBody();
-
-    /**
-     * @return true if the region allows travel behavior data collection feature.
-     */
-    boolean isTravelBehaviorDataCollectionEnabled();
-
-    /**
-     * @return true if the region allows enrolling more participants to the travel behavior data collection study.
-     */
-    boolean isEnrollParticipantsInStudy();
 }

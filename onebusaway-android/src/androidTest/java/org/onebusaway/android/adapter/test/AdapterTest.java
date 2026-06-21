@@ -17,19 +17,6 @@
 
 package org.onebusaway.android.adapter.test;
 
-import static androidx.test.InstrumentationRegistry.getTargetContext;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-
-import android.graphics.drawable.GradientDrawable;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-
-import androidx.core.widget.ImageViewCompat;
-import androidx.test.runner.AndroidJUnit4;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.onebusaway.android.R;
@@ -49,8 +36,21 @@ import org.onebusaway.android.ui.ArrivalsListAdapterStyleA;
 import org.onebusaway.android.ui.ArrivalsListAdapterStyleB;
 import org.onebusaway.android.util.UIUtils;
 
+import android.graphics.drawable.GradientDrawable;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.core.widget.ImageViewCompat;
+import androidx.test.runner.AndroidJUnit4;
+
+import static androidx.test.InstrumentationRegistry.getTargetContext;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * Tests aspects of the adapters used in OBA
@@ -213,9 +213,12 @@ public class AdapterTest extends ObaTestCase {
         View v = adapterA.getView(0, null, null);
         assertNotNull(v);
 
-        int silhouetteColor = Application.get().getResources().getColor(R.color.stop_info_occupancy);
-        int backgroundColor = Application.get().getResources().getColor(R.color.stop_info_occupancy_background);
-        int alpha = (int) (0.6f * 255);
+        int silhouetteColorHistorical = Application.get().getResources().getColor(R.color.stop_info_occupancy_historical);
+        int backgroundColorHistorical = Application.get().getResources().getColor(R.color.stop_info_occupancy_background_historical);
+        int silhouetteColorPredicted = Application.get().getResources().getColor(R.color.stop_info_occupancy_predicted);
+        int backgroundColorPredicted = Application.get().getResources().getColor(R.color.stop_info_occupancy_background_predicted);
+        int silhouetteColorPredictedFull = Application.get().getResources().getColor(R.color.stop_info_occupancy_predicted_full);
+        int backgroundColorPredictedFull = Application.get().getResources().getColor(R.color.stop_info_occupancy_background_predicted_full);
 
         // Test occupancy visibility
         ViewGroup occupancy = v.findViewById(R.id.occupancy);
@@ -229,11 +232,10 @@ public class AdapterTest extends ObaTestCase {
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
         assertEquals(View.VISIBLE, silhouette2.getVisibility());
         assertEquals(View.VISIBLE, silhouette3.getVisibility());
-        // FIXME - For all these colors tests for historical data, for some reason the alpha value for the expected value isn't right - "expected:<-1720223881> but was:<-8947849>"
-//        assertEquals(ColorUtils.setAlphaComponent(backgroundColor, alpha), ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-//        assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-//        assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-//        assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorHistorical, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         // 3 icons with predicted/realtime data color
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.NOT_ACCEPTING_PASSENGERS, OccupancyState.PREDICTED);
@@ -241,20 +243,20 @@ public class AdapterTest extends ObaTestCase {
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
         assertEquals(View.VISIBLE, silhouette2.getVisibility());
         assertEquals(View.VISIBLE, silhouette3.getVisibility());
-//        assertEquals(backgroundColor, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-//        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-//        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-//        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorPredictedFull, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.NOT_ACCEPTING_PASSENGERS, OccupancyState.REALTIME);
         assertEquals(View.VISIBLE, occupancy.getVisibility());
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
         assertEquals(View.VISIBLE, silhouette2.getVisibility());
         assertEquals(View.VISIBLE, silhouette3.getVisibility());
-//        assertEquals(backgroundColor, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-//        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-//        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-//        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorPredictedFull, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         // 3 icons with historical data color
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.FULL, OccupancyState.HISTORICAL);
@@ -262,10 +264,10 @@ public class AdapterTest extends ObaTestCase {
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
         assertEquals(View.VISIBLE, silhouette2.getVisibility());
         assertEquals(View.VISIBLE, silhouette3.getVisibility());
-        //assertEquals(ColorUtils.setAlphaComponent(backgroundColor, alpha), ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-        //assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-        //assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-        //assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorHistorical, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         // 3 icons with predicted/realtime data color
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.FULL, OccupancyState.PREDICTED);
@@ -273,20 +275,20 @@ public class AdapterTest extends ObaTestCase {
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
         assertEquals(View.VISIBLE, silhouette2.getVisibility());
         assertEquals(View.VISIBLE, silhouette3.getVisibility());
-        assertEquals(backgroundColor, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorPredictedFull, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.FULL, OccupancyState.REALTIME);
         assertEquals(View.VISIBLE, occupancy.getVisibility());
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
         assertEquals(View.VISIBLE, silhouette2.getVisibility());
         assertEquals(View.VISIBLE, silhouette3.getVisibility());
-        //assertEquals(backgroundColor, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorPredictedFull, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         // 3 icons with historical data color
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.CRUSHED_STANDING_ROOM_ONLY, OccupancyState.HISTORICAL);
@@ -294,10 +296,10 @@ public class AdapterTest extends ObaTestCase {
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
         assertEquals(View.VISIBLE, silhouette2.getVisibility());
         assertEquals(View.VISIBLE, silhouette3.getVisibility());
-        //assertEquals(ColorUtils.setAlphaComponent(backgroundColor, alpha), ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-        //assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-        //assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-        //assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorHistorical, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         // 3 icons with predicted/realtime data color
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.CRUSHED_STANDING_ROOM_ONLY, OccupancyState.PREDICTED);
@@ -305,20 +307,20 @@ public class AdapterTest extends ObaTestCase {
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
         assertEquals(View.VISIBLE, silhouette2.getVisibility());
         assertEquals(View.VISIBLE, silhouette3.getVisibility());
-        assertEquals(backgroundColor, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorPredictedFull, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.CRUSHED_STANDING_ROOM_ONLY, OccupancyState.REALTIME);
         assertEquals(View.VISIBLE, occupancy.getVisibility());
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
         assertEquals(View.VISIBLE, silhouette2.getVisibility());
         assertEquals(View.VISIBLE, silhouette3.getVisibility());
-        assertEquals(backgroundColor, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorPredictedFull, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorPredictedFull, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         // 2 icons with historical data color
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.STANDING_ROOM_ONLY, OccupancyState.HISTORICAL);
@@ -326,10 +328,10 @@ public class AdapterTest extends ObaTestCase {
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
         assertEquals(View.VISIBLE, silhouette2.getVisibility());
         assertEquals(View.INVISIBLE, silhouette3.getVisibility());
-//        assertEquals(ColorUtils.setAlphaComponent(backgroundColor, alpha), ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-//        assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-//        assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-//        assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorHistorical, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         // 2 icons with predicted/realtime data color
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.STANDING_ROOM_ONLY, OccupancyState.PREDICTED);
@@ -337,52 +339,52 @@ public class AdapterTest extends ObaTestCase {
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
         assertEquals(View.VISIBLE, silhouette2.getVisibility());
         assertEquals(View.INVISIBLE, silhouette3.getVisibility());
-        assertEquals(backgroundColor, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorPredicted, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.STANDING_ROOM_ONLY, OccupancyState.REALTIME);
         assertEquals(View.VISIBLE, occupancy.getVisibility());
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
         assertEquals(View.VISIBLE, silhouette2.getVisibility());
         assertEquals(View.INVISIBLE, silhouette3.getVisibility());
-        assertEquals(backgroundColor, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorPredicted, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         // 1 icon with historical data color
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.FEW_SEATS_AVAILABLE, OccupancyState.HISTORICAL);
         assertEquals(View.VISIBLE, occupancy.getVisibility());
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
-        assertEquals(View.VISIBLE, silhouette2.getVisibility());
+        assertEquals(View.INVISIBLE, silhouette2.getVisibility());
         assertEquals(View.INVISIBLE, silhouette3.getVisibility());
-//        assertEquals(ColorUtils.setAlphaComponent(backgroundColor, alpha), ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-//        assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-//        assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-//        assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorHistorical, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         // 1 icon with predicted/realtime data color
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.FEW_SEATS_AVAILABLE, OccupancyState.PREDICTED);
         assertEquals(View.VISIBLE, occupancy.getVisibility());
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
-        assertEquals(View.VISIBLE, silhouette2.getVisibility());
+        assertEquals(View.INVISIBLE, silhouette2.getVisibility());
         assertEquals(View.INVISIBLE, silhouette3.getVisibility());
-        assertEquals(backgroundColor, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorPredicted, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.FEW_SEATS_AVAILABLE, OccupancyState.REALTIME);
         assertEquals(View.VISIBLE, occupancy.getVisibility());
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
-        assertEquals(View.VISIBLE, silhouette2.getVisibility());
+        assertEquals(View.INVISIBLE, silhouette2.getVisibility());
         assertEquals(View.INVISIBLE, silhouette3.getVisibility());
-        assertEquals(backgroundColor, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorPredicted, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         // 1 icon with historical data color
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.MANY_SEATS_AVAILABLE, OccupancyState.HISTORICAL);
@@ -390,10 +392,10 @@ public class AdapterTest extends ObaTestCase {
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
         assertEquals(View.INVISIBLE, silhouette2.getVisibility());
         assertEquals(View.INVISIBLE, silhouette3.getVisibility());
-//        assertEquals(ColorUtils.setAlphaComponent(backgroundColor, alpha), ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-//        assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-//        assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-//        assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorHistorical, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         // 1 icon with predicted/realtime data color
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.MANY_SEATS_AVAILABLE, OccupancyState.PREDICTED);
@@ -401,20 +403,20 @@ public class AdapterTest extends ObaTestCase {
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
         assertEquals(View.INVISIBLE, silhouette2.getVisibility());
         assertEquals(View.INVISIBLE, silhouette3.getVisibility());
-        assertEquals(backgroundColor, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorPredicted, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.MANY_SEATS_AVAILABLE, OccupancyState.REALTIME);
         assertEquals(View.VISIBLE, occupancy.getVisibility());
         assertEquals(View.VISIBLE, silhouette1.getVisibility());
         assertEquals(View.INVISIBLE, silhouette2.getVisibility());
         assertEquals(View.INVISIBLE, silhouette3.getVisibility());
-        assertEquals(backgroundColor, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorPredicted, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         // 0 icons with historical data color
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.EMPTY, OccupancyState.HISTORICAL);
@@ -422,10 +424,10 @@ public class AdapterTest extends ObaTestCase {
         assertEquals(View.INVISIBLE, silhouette1.getVisibility());
         assertEquals(View.INVISIBLE, silhouette2.getVisibility());
         assertEquals(View.INVISIBLE, silhouette3.getVisibility());
-//        assertEquals(ColorUtils.setAlphaComponent(backgroundColor, alpha), ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-//        assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-//        assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-//        assertEquals(ColorUtils.setAlphaComponent(silhouetteColor, alpha), ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorHistorical, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorHistorical, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         // 0 icons with predicted/realtime data color
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.EMPTY, OccupancyState.PREDICTED);
@@ -433,10 +435,10 @@ public class AdapterTest extends ObaTestCase {
         assertEquals(View.INVISIBLE, silhouette1.getVisibility());
         assertEquals(View.INVISIBLE, silhouette2.getVisibility());
         assertEquals(View.INVISIBLE, silhouette3.getVisibility());
-        assertEquals(backgroundColor, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorPredicted, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         // 0 icons with predicted/realtime data color
         UIUtils.setOccupancyVisibilityAndColor(occupancy, Occupancy.EMPTY, OccupancyState.REALTIME);
@@ -444,10 +446,10 @@ public class AdapterTest extends ObaTestCase {
         assertEquals(View.INVISIBLE, silhouette1.getVisibility());
         assertEquals(View.INVISIBLE, silhouette2.getVisibility());
         assertEquals(View.INVISIBLE, silhouette3.getVisibility());
-        assertEquals(backgroundColor, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
-        assertEquals(silhouetteColor, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
+        assertEquals(backgroundColorPredicted, ((GradientDrawable) occupancy.getBackground()).getColor().getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette1).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette2).getDefaultColor());
+        assertEquals(silhouetteColorPredicted, ImageViewCompat.getImageTintList(silhouette3).getDefaultColor());
 
         // Hide entire occupancy
         UIUtils.setOccupancyVisibilityAndColor(occupancy, null, OccupancyState.HISTORICAL);
@@ -515,10 +517,10 @@ public class AdapterTest extends ObaTestCase {
         assertEquals("Historically standing room", occupancy.getContentDescription());
 
         UIUtils.setOccupancyContentDescription(occupancy, Occupancy.FEW_SEATS_AVAILABLE, OccupancyState.HISTORICAL);
-        assertEquals("Historically few seats available", occupancy.getContentDescription());
+        assertEquals("Historically seats available", occupancy.getContentDescription());
 
         UIUtils.setOccupancyContentDescription(occupancy, Occupancy.MANY_SEATS_AVAILABLE, OccupancyState.HISTORICAL);
-        assertEquals("Historically many seats available", occupancy.getContentDescription());
+        assertEquals("Historically seats available", occupancy.getContentDescription());
 
         UIUtils.setOccupancyContentDescription(occupancy, Occupancy.EMPTY, OccupancyState.HISTORICAL);
         assertEquals("Historically empty", occupancy.getContentDescription());
@@ -540,10 +542,10 @@ public class AdapterTest extends ObaTestCase {
         assertEquals("Standing room", occupancy.getContentDescription());
 
         UIUtils.setOccupancyContentDescription(occupancy, Occupancy.FEW_SEATS_AVAILABLE, OccupancyState.REALTIME);
-        assertEquals("Few seats available", occupancy.getContentDescription());
+        assertEquals("Seats available", occupancy.getContentDescription());
 
         UIUtils.setOccupancyContentDescription(occupancy, Occupancy.MANY_SEATS_AVAILABLE, OccupancyState.REALTIME);
-        assertEquals("Many seats available", occupancy.getContentDescription());
+        assertEquals("Seats available", occupancy.getContentDescription());
 
         UIUtils.setOccupancyContentDescription(occupancy, Occupancy.EMPTY, OccupancyState.REALTIME);
         assertEquals("Empty", occupancy.getContentDescription());
@@ -565,10 +567,10 @@ public class AdapterTest extends ObaTestCase {
         assertEquals("Predicted standing room", occupancy.getContentDescription());
 
         UIUtils.setOccupancyContentDescription(occupancy, Occupancy.FEW_SEATS_AVAILABLE, OccupancyState.PREDICTED);
-        assertEquals("Predicted few seats available", occupancy.getContentDescription());
+        assertEquals("Predicted seats available", occupancy.getContentDescription());
 
         UIUtils.setOccupancyContentDescription(occupancy, Occupancy.MANY_SEATS_AVAILABLE, OccupancyState.PREDICTED);
-        assertEquals("Predicted many seats available", occupancy.getContentDescription());
+        assertEquals("Predicted seats available", occupancy.getContentDescription());
 
         UIUtils.setOccupancyContentDescription(occupancy, Occupancy.EMPTY, OccupancyState.PREDICTED);
         assertEquals("Predicted empty", occupancy.getContentDescription());

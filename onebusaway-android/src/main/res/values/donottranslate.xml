@@ -34,17 +34,10 @@
     <string name="preferences_key_powered_by_oba">preference_powered_by_oba</string>
     <string name="preferences_key_about">preference_about</string>
     <string name="preference_key_preferred_units">preference_preferred_units</string>
-    <string name="preference_key_preferred_temperature_units">preference_preferred_temperature_units</string>
-    <string name="preference_key_display_weather_view">preference_key_display_weather_view</string>
-    <string name="preference_key_app_theme">preference_app_theme</string>
     <string name="preference_key_arrival_info_style">preference_arrival_info_style</string>
     <string name="preference_key_show_negative_arrivals">preference_show_negative_arrivals</string>
     <string name="preference_key_show_zoom_controls">preference_show_zoom_controls</string>
-    <string name="preference_key_map_mode">preference_key_map_mode</string>
-    <string name="preference_key_show_available_studies">preference_show_available_studies</string>
-    <string name="preference_key_hide_alerts">preference_hide_alerts</string>
     <string name="preference_key_default_stop_sort">preference_default_stop_sort</string>
-    <string name="preference_key_default_reminder_time">preference_default_reminder_time</string>
     <string name="preference_key_default_reminder_sort">preference_default_reminder_sort</string>
     <string name="preference_key_tutorial">preference_key_tutorial</string>
     <string name="preference_key_show_header_arrivals">preference_key_show_header_arrivals</string>
@@ -63,44 +56,21 @@
     <string name="preference_key_trip_plan_avoid_stairs">preference_trip_plan_avoid_stairs</string>
     <string name="preference_key_notification_sound">preference_notification_sound</string>
     <string name="preference_key_preference_vibrate_allowed">preference_vibrate_allowed</string>
-    <string name="preference_key_nav_test_id">preference_key_nav_test_id</string>
-    <string name="preference_key_never_show_change_location_mode_dialog">preference_never_show_change_location_mode_dialog</string>
+    <string name="preference_key_social_category">preference_category_social</string>
+    <string name="preference_key_social">preference_social</string>
     <string name="preference_key_never_show_payment_warning_dialog">never_show_payment_warning_dialog</string>
-    <string name="preferences_key_user_debugging_logs_category">preferences_key_user_debugging_logs_category</string>
-    <string name="preferences_key_user_share_destination_logs">preferences_user_share_logs</string>
-    <string name="preference_key_never_show_destination_reminder_beta_dialog">preference_never_show_destination_reminder_beta_dialog</string>
-    <string name="preferences_key_travel_behavior">preference_travel_behavior</string>
-    <string name="preferences_key_user_denied_location_permissions">preferences_key_user_denied_location_permissions</string>
-    <string name="preference_key_push_firebase_data">preference_key_push_firebase_data</string>
-    <string name="preferences_display_test_alerts">preferences_display_test_alerts</string>
+
     <!-- Regions API URL -->
-    <string name="regions_api_url">https://regions.onebusaway.org/regions-v3.json</string>
-
-    <!-- Weather API URL -->
-    <string name="weather_api_endpoint">/api/v1/regions/regionID/weather.json</string>
-
-    <!-- GET Survey API URL -->
-    <string name="studies_api_endpoint">/api/v1/regions/regionID/surveys.json</string>
-
-    <!-- POST Survey API URL -->
-    <string name="submit_survey_api_endpoint">/api/v1/survey_responses/</string>
-
-    <!-- Arrivals Alarm API URL -->
-    <string name="arrivals_reminders_api_endpoint">/api/v1/regions/</string>
-
-    <!-- Alerts API Endpoint -->
-    <string name="alerts_api_endpoint">/api/v1/regions/regionID/alerts.pb</string>
+    <string name="regions_api_url">http://regions.onebusaway.org/regions-v3.json</string>
 
     <!-- Donate URL -->
-    <string name="donate_url">https://onebusaway.org/donate/</string>
+    <string name="donate_url">http://onebusaway.org/donate/</string>
+
+    <!-- IdeaScale URL -->
+    <string name="ideascale_url">http://onebusaway.ideascale.com/a/ideas/top/campaign-filter/byids/campaigns/46167</string>
 
     <!-- Powered by OBA URL -->
-    <string name="powered_by_oba_url">https://onebusaway.org</string>
-
-    <!-- Travel Behavior Study Participant Info Url-->
-    <string name="travel_behavior_participants_url">https://script.google.com/macros/s/AKfycbyUnU7wYhGk_Y6UyEjQ0ePNn9avA3jA7QqDHI2PzKg2RYftrj9x/exec</string>
-
-    <string name="travel_behavior_participants_opt_out_url">https://script.google.com/macros/s/AKfycbyrCNQluXQHpMZt-jYqjdmV9CLT43sSCeGcIS1yNJtWB5LCtSOw/exec</string>
+    <string name="powered_by_oba_url">http://onebusaway.org</string>
 
     <!-- Open-source link for Github project -->
     <string name="open_source_github">https://github.com/OneBusAway/onebusaway-android</string>
@@ -110,9 +80,6 @@
 
     <!-- Google Play Store Listing prefix -->
     <string name="google_play_listing_prefix">https://play.google.com/store/apps/details?id=%1s</string>
-
-    <!-- Pelias API URL for geocoding -->
-    <string name="pelias_api_url">https://api.geocode.earth/v1/autocomplete</string>
 
     <!-- Oba Analytics Messages -->
     <string name="analytics_problem">report_problem</string>
@@ -147,14 +114,14 @@
     <string name="analytics_label_hide_arrivals_in_header">Clicked hide arrivals in header
     </string>
     <string name="analytics_label_trip_plan">Planned a Trip</string>
-    <string name="analytics_label_button_press_star">starred_stops</string>
-    <string name="analytics_label_button_press_nearby">nearby</string>
-    <string name="analytics_label_button_press_reminders">my_reminders</string>
-    <string name="analytics_label_button_press_trip_plan">trip_plan</string>
-    <string name="analytics_label_button_press_settings">settings</string>
-    <string name="analytics_label_button_press_help">help</string>
-    <string name="analytics_label_button_press_feedback">send_feedback</string>
-    <string name="analytics_label_button_press_open_source">github</string>
+    <string name="analytics_label_button_press_star">nav_drawer_starred_stops</string>
+    <string name="analytics_label_button_press_nearby">nav_drawer_nearby</string>
+    <string name="analytics_label_button_press_reminders">nav_drawer_my_reminders</string>
+    <string name="analytics_label_button_press_trip_plan">nav_drawer_trip_plan</string>
+    <string name="analytics_label_button_press_settings">nav_drawer_settings</string>
+    <string name="analytics_label_button_press_help">nav_drawer_help</string>
+    <string name="analytics_label_button_press_feedback">nav_drawer_feedback</string>
+    <string name="analytics_label_button_press_open_source">nav_drawer_github</string>
     <string name="analytics_label_button_press_tutorial">preference_tutorial</string>
     <string name="analytics_label_button_press_donate">preference_donate</string>
     <string name="analytics_label_button_press_powered_by_oba">preference_power_by_oba</string>
@@ -187,6 +154,7 @@
     <string name="analytics_label_customer_service_email">Send email</string>
     <string name="analytics_label_customer_service_email_without_location">Send email without location</string>
     <string name="analytics_label_customer_service_phone">Make phone call</string>
+    <string name="analytics_label_idea_scale">IdeaScale</string>
     <string name="analytics_label_custom_url">Custom URL</string>
     <string name="analytics_label_star_route">Starred route</string>
     <string name="analytics_label_unstar_route">Unstarred route</string>
@@ -201,32 +169,27 @@
     <string name="analytics_label_bike_station_balloon_clicked">Pressed bike station balloon</string>
     <string name="analytics_label_floating_bike_balloon_clicked">Pressed floating bike balloon</string>
     <string name="analytics_label_stop_category">stops</string>
-    <string name="analytics_label_destination_reminder">destination_reminder</string>
-    <string name="analytics_label_destination_reminder_variant_started">destination_reminder_started</string>
-    <string name="analytics_label_destination_reminder_variant_get_ready">destination_reminder_get_ready</string>
-    <string name="analytics_label_destination_reminder_variant_exit_at_next_stop">destination_reminder_exit_at_next_stop</string>
-    <string name="analytics_label_destination_reminder_variant_ended">destination_reminder_ended</string>
 
-    <!-- Analytics for occupancy -->
+    <!-- Analytics for social -->
+    <string name="analytics_label_button_press_social_sign_in">Clicked Social Sign In</string>
+    <string name="analytics_label_button_press_social_profile">Clicked Social Profile</string>
+    <string name="analytics_label_button_press_social_popular">Clicked Social Popular Feed</string>
+    <string name="analytics_label_button_press_social_pins">Clicked Social Pins</string>
+    <string name="analytics_label_button_press_social_activity_feed">Clicked Social Activity Feed</string>
+    <string name="analytics_label_button_press_social_settings">Clicked Social Settings</string>
+    <string name="analytics_label_button_press_social_stop">Clicked Social Stop Arrivals Header</string>
+    <string name="analytics_label_button_press_social_route_options">Clicked Social Route Options</string>
+    <string name="analytics_label_button_press_social_route_style_b">Clicked Social Route Style B Card</string>
+    <string name="analytics_login_embedded_social">embedded_social</string>
     <string name="analytics_label_button_press_about_occupancy">Clicked About Occupancy</string>
 
     <!-- Analytics for payment -->
     <string name="analytics_label_button_fare_payment">fare_payment</string>
-    <string name="analytics_label_button_bike_share">bike_share</string>
     <string name="analytics_label_download_app">download_app</string>
     <string name="analytics_label_open_app">open_app</string>
 
-    <!-- Analytics for travel behavior data collection -->
-    <string name="analytics_label_button_travel_behavior_enroll_not_now">travel_behavior_enroll_not_now</string>
-    <string name="analytics_label_button_travel_behavior_opt_out_at_first_dialog">travel_behavior_opt_out_first_dialog</string>
-    <string name="analytics_label_button_travel_behavior_opt_in_over_18">travel_behavior_opt_in_over_18</string>
-    <string name="analytics_label_button_travel_behavior_opt_out_under_18">travel_behavior_opt_out_under_18</string>
-    <string name="analytics_label_button_travel_behavior_opt_in_informed_consent">travel_behavior_opt_in_informed_consent</string>
-    <string name="analytics_label_button_travel_behavior_opt_out_informed_consent">travel_behavior_opt_out_informed_consent</string>
-
-
     <!-- General strings -->
-    <string name="https_prefix">https://</string>
+    <string name="http_prefix">http://</string>
 
     <!-- Problem reporting additions -->
     <string name="ri_append_start">\n\n---------------------\n</string>
@@ -256,18 +219,9 @@
     <string name="ri_app_feedback_email">android-app@onebusaway.org</string>
 
     <string name="arrival_list_stop_directions">\u0020(%1$s)</string>
+    <string name="sobi_deep_link_floating_bike_url">http://app.socialbicycles.com/map?bike_id=</string>
+    <string name="sobi_deep_link_bike_station_url">https://app.socialbicycles.com/map?hub_id=</string>
 
-    <!-- Bikeshare -->
-    <string name="hopr_android_app_id">hopr.com.hopr</string>
     <string name="traverse_mode_bicycle_rent">BICYCLE_RENT</string>
 
-    <!-- User Feedback Firebase Analytics -->
-    <string name="analytics_label_button_press_destination_reminder_feedback">destination_reminder_feedback</string>
-    <string name="analytics_label_destination_reminder_yes">yes</string>
-    <string name="analytics_label_destination_reminder_no">no</string>
-    <string name="analytics_label_custom_metadata_response">Response</string>
-    <string name="analytics_label_custom_metadata_feedback">FeedbackText</string>
-
-    <string name="not_request_battery_optimizations_key">request_battery_optimizations_key</string>
-    <string name="preference_key_reset_donation_timestamps">preference_key_reset_donation_timestamps</string>
 </resources>

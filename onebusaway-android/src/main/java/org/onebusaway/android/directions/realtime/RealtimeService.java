@@ -15,6 +15,15 @@
  */
 package org.onebusaway.android.directions.realtime;
 
+import org.onebusaway.android.R;
+import org.onebusaway.android.app.Application;
+import org.onebusaway.android.directions.model.ItineraryDescription;
+import org.onebusaway.android.directions.tasks.TripRequest;
+import org.onebusaway.android.directions.util.OTPConstants;
+import org.onebusaway.android.directions.util.TripRequestBuilder;
+import org.opentripplanner.api.model.Itinerary;
+import org.opentripplanner.api.model.Leg;
+
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.IntentService;
@@ -27,29 +36,14 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.core.app.NotificationCompat;
-
-import org.onebusaway.android.R;
-import org.onebusaway.android.app.Application;
-import org.onebusaway.android.directions.model.ItineraryDescription;
-import org.onebusaway.android.directions.tasks.TripRequest;
-import org.onebusaway.android.directions.util.OTPConstants;
-import org.onebusaway.android.directions.util.TripRequestBuilder;
-import org.opentripplanner.api.model.Itinerary;
-import org.opentripplanner.api.model.Leg;
-import org.opentripplanner.api.model.TripPlan;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-/**
- * This service is started after a trip is planned by the user so they can be notified if the
- * trip results for their request change in the near future. For example, if a user plans a trip,
- * and then the top result for that trip gets delayed by 20 minutes, the user will be notified
- * that new trip results are available.
- */
+import androidx.core.app.NotificationCompat;
+
+
 public class RealtimeService extends IntentService {
 
     private static final String TAG = "RealtimeService";
@@ -146,14 +140,8 @@ public class RealtimeService extends IntentService {
             Intent future = new Intent(OTPConstants.INTENT_START_CHECKS);
             future.putExtras(bundle);
 
-            int flags;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                flags = PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE;
-            } else {
-                flags = PendingIntent.FLAG_CANCEL_CURRENT;
-            }
             PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(),
-                    0, future, flags);
+                    0, future, PendingIntent.FLAG_CANCEL_CURRENT);
             getAlarmManager().set(AlarmManager.RTC_WAKEUP, queryStart.getTime(), pendingIntent);
         }
 
@@ -177,16 +165,16 @@ public class RealtimeService extends IntentService {
 
         TripRequest.Callback callback = new TripRequest.Callback() {
             @Override
-            public void onTripRequestComplete(TripPlan tripPlan, String url) {
-                if (tripPlan == null || tripPlan.itineraries == null || tripPlan.itineraries.isEmpty()) {
+            public void onTripRequestComplete(List<Itinerary> itineraries, String url) {
+                if (itineraries == null || itineraries.isEmpty()) {
                     onTripRequestFailure(-1, null);
                     return;
                 }
 
                 // Check each itinerary. Notify user if our *current* itinerary doesn't exist
                 // or has a lower rank.
-                for (int i = 0; i < tripPlan.itineraries.size(); i++) {
-                    ItineraryDescription other = new ItineraryDescription(tripPlan.itineraries.get(i));
+                for (int i = 0; i < itineraries.size(); i++) {
+                    ItineraryDescription other = new ItineraryDescription(itineraries.get(i));
 
                     if (itineraryDescription.itineraryMatches(other)) {
 
@@ -199,7 +187,7 @@ public class RealtimeService extends IntentService {
                                     (delay > 0) ? R.string.trip_plan_delay
                                             : R.string.trip_plan_early,
                                     R.string.trip_plan_notification_new_plan_text,
-                                    source, builder.getBundle(), tripPlan.itineraries);
+                                    source, builder.getBundle(), itineraries);
                             disableListenForTripUpdates();
                             return;
                         }
@@ -215,7 +203,7 @@ public class RealtimeService extends IntentService {
                 showNotification(itineraryDescription,
                         R.string.trip_plan_notification_new_plan_title,
                         R.string.trip_plan_notification_new_plan_text, source,
-                        builder.getBundle(), tripPlan.itineraries);
+                        builder.getBundle(), itineraries);
                 disableListenForTripUpdates();
             }
 
@@ -248,17 +236,11 @@ public class RealtimeService extends IntentService {
         openIntent.putExtra(OTPConstants.INTENT_SOURCE, OTPConstants.Source.NOTIFICATION);
         openIntent.putExtra(OTPConstants.ITINERARIES, (ArrayList<Itinerary>) itineraries);
         openIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        int flags;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            flags = PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE;
-        } else {
-            flags = PendingIntent.FLAG_CANCEL_CURRENT;
-        }
         PendingIntent openPendingIntent = PendingIntent
                 .getActivity(getApplicationContext(),
                         0,
                         openIntent,
-                        flags);
+                        PendingIntent.FLAG_CANCEL_CURRENT);
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(getApplicationContext(), Application.CHANNEL_TRIP_PLAN_UPDATES_ID)
@@ -304,14 +286,8 @@ public class RealtimeService extends IntentService {
             Bundle extras = getSimplifiedBundle(bundle);
             intent.putExtras(extras);
         }
-        int flags;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
-        } else {
-            flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        }
         PendingIntent alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent,
-                flags);
+                PendingIntent.FLAG_UPDATE_CURRENT);
         return alarmIntent;
     }
 

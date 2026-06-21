@@ -15,24 +15,16 @@
  */
 package org.onebusaway.android.io.backup;
 
-import static org.onebusaway.android.util.BackupUtilKt.uriToTempFile;
-
-import android.content.ContentProviderClient;
-import android.content.Context;
-import android.net.Uri;
-import android.util.Log;
-import android.widget.Toast;
-
 import org.apache.commons.io.FileUtils;
-import org.onebusaway.android.R;
 import org.onebusaway.android.provider.ObaContract;
 import org.onebusaway.android.provider.ObaProvider;
 
+import android.content.ContentProviderClient;
+import android.content.Context;
+import android.os.Environment;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * Big note, that this is currently fairly unsafe.
@@ -46,49 +38,37 @@ import java.io.OutputStream;
  */
 public final class Backup {
 
-    public static final String FILE_NAME = "OneBusAway.backup";
+    private static final String BACKUP_TYPE = "OBABackups";
+
+    private static final String BACKUP_NAME = "db.backup";
 
     private static File getDB(Context context) {
         return ObaProvider.getDatabasePath(context);
     }
 
-    /**
-     * Initiates a backup process, allowing the user to choose a location
-     * (such as the Documents directory) to save the backup file.
-     */
-    public static void backup(Context context,Uri uri) throws IOException{
-        try (InputStream inputStream = new FileInputStream(getDB(context));
-             OutputStream outputStream = context.getContentResolver().openOutputStream(uri)) {
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = inputStream.read(buffer)) > 0) {
-                if (outputStream != null) {
-                    outputStream.write(buffer, 0, length);
-                }
-            }
-            if (outputStream != null) {
-                outputStream.flush();
-            }
-            Toast.makeText(context,
-                    context.getString(R.string.preferences_db_saved),
-                    Toast.LENGTH_LONG).show();
-            Log.d("Backup", "Database backup saved successfully to: " + uri);
-        } catch (IOException e) {
-            Toast.makeText(context,
-                    context.getString(R.string.preferences_db_save_error, e.getMessage()),
-                    Toast.LENGTH_LONG).show();
-            Log.e("Backup", "Error saving database backup", e);
-        }
+    private static File getBackup(Context context) {
+        File backupDir = Environment.getExternalStoragePublicDirectory(BACKUP_TYPE);
+        return new File(backupDir, BACKUP_NAME);
     }
 
     /**
-     * Restores data from the location where the user saved the backup.
-     * @param uri URI to the backup file, as returned by the system UI picker. Following targeting
-     *            Android 11 we can't access this directory and need to rely on the system UI picker.
+     * Performs a backup to the SD card.
      */
-    public static void restore(Context context, Uri uri) throws IOException {
+    public static String backup(Context context) throws IOException {
+        // We need two things:
+        // 1. The path to the database;
+        // 2. The path on the SD card to the backup file.
+        File backupPath = getBackup(context);
+        FileUtils.copyFile(getDB(context), backupPath);
+        return backupPath.getAbsolutePath();
+    }
+
+    /**
+     * Performs a restore from the SD card.
+     */
+    public static void restore(Context context) throws IOException {
         File dbPath = getDB(context);
-        File backupPath = uriToTempFile(context, uri);
+        File backupPath = getBackup(context);
 
         // At least here we can decide that the database is closed.
         ContentProviderClient client = null;
@@ -104,10 +84,10 @@ public final class Backup {
             if (client != null) {
                 client.release();
             }
-            if (backupPath != null) {
-                backupPath.delete();
-            }
         }
     }
 
+    public static boolean isRestoreAvailable(Context context) {
+        return getBackup(context).exists();
+    }
 }

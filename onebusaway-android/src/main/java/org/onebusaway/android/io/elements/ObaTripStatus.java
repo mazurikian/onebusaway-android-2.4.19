@@ -15,9 +15,9 @@
  */
 package org.onebusaway.android.io.elements;
 
-import android.location.Location;
-
 import org.onebusaway.android.util.LocationUtils;
+
+import android.location.Location;
 
 import java.io.Serializable;
 
@@ -135,9 +135,9 @@ public interface ObaTripStatus {
     public String getPhase();
 
     /**
-     * @return The status modifiers for the trip, defined by {@link Status}. Can be null.
+     * @return The status modifiers for the trip. Can be null.
      */
-    public Status getStatus();
+    public String getStatus();
 
     /**
      * @return The last known real-time update for the transit vehicle, or 0 if we
@@ -176,5 +176,5 @@ public interface ObaTripStatus {
     /**
      * @return the real-time occupancy of the vehicle
      */
-    Occupancy getOccupancyStatus();
+    Occupancy getRealtimeOccupancy();
 }

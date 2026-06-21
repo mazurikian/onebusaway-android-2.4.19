@@ -57,8 +57,7 @@
                 <TextView
                     android:id="@+id/route"
                     style="@style/StopInfoRoute"
-                    android:layout_width="wrap_content"
-                    android:minWidth="80dp"
+                    android:layout_width="80sp"
                     android:layout_column="0"
                     android:gravity="center"
                     tools:text="5" />
@@ -97,19 +96,6 @@
                         android:layout_marginTop="2dp"
                         android:layout_marginBottom="2dp"
                         app:layout_constraintTop_toBottomOf="@id/destination" />
-
-                    <include
-                        android:id="@+id/car_count"
-                        layout="@layout/arrivals_list_tv_template_style_a_status_smallest"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_marginLeft="5dp"
-                        android:visibility="gone"
-                        app:layout_constraintTop_toTopOf="@id/status"
-                        app:layout_constraintBottom_toBottomOf="@id/status"
-                        app:layout_constraintStart_toEndOf="@+id/status"
-                        app_layout_constraintEnd_toEndOf="@+id/time"/>
 
                     <include
                         android:id="@+id/occupancy"

@@ -18,6 +18,35 @@
  */
 package org.onebusaway.android.ui;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
+import org.onebusaway.android.R;
+import org.onebusaway.android.app.Application;
+import org.onebusaway.android.io.ObaAnalytics;
+import org.onebusaway.android.io.ObaApi;
+import org.onebusaway.android.io.elements.ObaArrivalInfo;
+import org.onebusaway.android.io.elements.ObaReferences;
+import org.onebusaway.android.io.elements.ObaRegion;
+import org.onebusaway.android.io.elements.ObaRoute;
+import org.onebusaway.android.io.elements.ObaSituation;
+import org.onebusaway.android.io.elements.ObaStop;
+import org.onebusaway.android.io.elements.ObaTrip;
+import org.onebusaway.android.io.elements.Occupancy;
+import org.onebusaway.android.io.elements.OccupancyState;
+import org.onebusaway.android.io.request.ObaArrivalInfoResponse;
+import org.onebusaway.android.map.MapParams;
+import org.onebusaway.android.provider.ObaContract;
+import org.onebusaway.android.report.ui.InfrastructureIssueActivity;
+import org.onebusaway.android.util.ArrayAdapterWithIcon;
+import org.onebusaway.android.util.ArrivalInfoUtils;
+import org.onebusaway.android.util.BuildFlavorUtils;
+import org.onebusaway.android.util.EmbeddedSocialUtils;
+import org.onebusaway.android.util.FragmentUtils;
+import org.onebusaway.android.util.LocationUtils;
+import org.onebusaway.android.util.PreferenceUtils;
+import org.onebusaway.android.util.ShowcaseViewUtils;
+import org.onebusaway.android.util.UIUtils;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -47,61 +76,29 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.util.Pair;
-import androidx.fragment.app.DialogFragment;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.CursorLoader;
-import androidx.loader.content.Loader;
-
-import com.google.firebase.analytics.FirebaseAnalytics;
-
-import org.onebusaway.android.R;
-import org.onebusaway.android.app.Application;
-import org.onebusaway.android.database.recentStops.RecentStopsManager;
-import org.onebusaway.android.io.ObaAnalytics;
-import org.onebusaway.android.io.ObaApi;
-import org.onebusaway.android.io.PlausibleAnalytics;
-import org.onebusaway.android.io.elements.ObaArrivalInfo;
-import org.onebusaway.android.io.elements.ObaReferences;
-import org.onebusaway.android.io.elements.ObaRoute;
-import org.onebusaway.android.io.elements.ObaSituation;
-import org.onebusaway.android.io.elements.ObaStop;
-import org.onebusaway.android.io.elements.ObaTrip;
-import org.onebusaway.android.io.elements.Occupancy;
-import org.onebusaway.android.io.elements.OccupancyState;
-import org.onebusaway.android.io.request.ObaArrivalInfoResponse;
-import org.onebusaway.android.io.request.survey.SurveyListener;
-import org.onebusaway.android.io.request.survey.model.SubmitSurveyResponse;
-import org.onebusaway.android.map.MapParams;
-import org.onebusaway.android.provider.ObaContract;
-import org.onebusaway.android.report.ui.InfrastructureIssueActivity;
-import org.onebusaway.android.travelbehavior.TravelBehaviorManager;
-import org.onebusaway.android.ui.survey.SurveyManager;
-import org.onebusaway.android.io.request.survey.model.StudyResponse;
-import org.onebusaway.android.util.ArrayAdapterWithIcon;
-import org.onebusaway.android.util.ArrivalInfoUtils;
-import org.onebusaway.android.util.BuildFlavorUtils;
-import org.onebusaway.android.util.DBUtil;
-import org.onebusaway.android.util.FragmentUtils;
-import org.onebusaway.android.util.LocationUtils;
-import org.onebusaway.android.util.PreferenceUtils;
-import org.onebusaway.android.util.ReminderUtils;
-import org.onebusaway.android.util.ShowcaseViewUtils;
-import org.onebusaway.android.util.UIUtils;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.util.Pair;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
+
 //
 // We don't use the ListFragment because the support library's version of
 // the ListFragment doesn't work well with our header.
 //
-public class ArrivalsListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<ObaArrivalInfoResponse>, ArrivalsListHeader.Controller {
+public class ArrivalsListFragment extends ListFragment
+        implements LoaderManager.LoaderCallbacks<ObaArrivalInfoResponse>,
+        ArrivalsListHeader.Controller {
 
     private static final String TAG = "ArrivalsListFragment";
 
@@ -111,10 +108,12 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
 
     public static final String STOP_DIRECTION = ".StopDir";
 
+    public static final String DISCUSSION = ".Discussion";
+
     /**
      * Comma-delimited set of routes that serve this stop
      * See {@link UIUtils#serializeRouteDisplayNames(ObaStop,
-     * HashMap)}
+     * java.util.HashMap)}
      */
     public static final String STOP_ROUTES = ".StopRoutes";
 
@@ -139,7 +138,6 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
     private ArrivalsListHeader mHeader;
 
     private View mHeaderView;
-    private View surveyHeaderView;
 
     private View mFooter;
 
@@ -180,8 +178,6 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
     ObaArrivalInfo[] mArrivalInfo;
 
     private FirebaseAnalytics mFirebaseAnalytics;
-
-    private SurveyManager surveyManager;
 
     public interface Listener {
 
@@ -234,7 +230,6 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
         public IntentBuilder(Context context, ObaStop stop, HashMap<String, ObaRoute> routes) {
             mIntent = new Intent(context, ArrivalsListFragment.class);
             mIntent.setData(Uri.withAppendedPath(ObaContract.Stops.CONTENT_URI, stop.getId()));
-            RecentStopsManager.saveStop(context,stop);
             setStopName(stop.getName());
             setStopCode(stop.getStopCode());
             setStopDirection(stop.getDirection());
@@ -267,7 +262,7 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
          * Sets the routes that serve this stop via a comma-delimited set of route display names
          * <p/>
          * See {@link UIUtils#serializeRouteDisplayNames(ObaStop,
-         * HashMap)}
+         * java.util.HashMap)}
          *
          * @param routes comma-delimited list of route display names that serve this stop
          */
@@ -293,6 +288,7 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
 
         initArrivalInfoViews(inflater);
+
         return inflater.inflate(R.layout.fragment_arrivals_list, null);
     }
 
@@ -352,6 +348,17 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
                 UIUtils.getNoArrivalsMessage(getActivity(), getArrivalsLoader().getMinutesAfter(),
                         false, false)
         );
+
+        if (mHeader != null) {
+            mHeader.refresh();
+            if (getStopId() != null) {
+                Bundle extras = getActivity().getIntent().getExtras();
+                if (extras != null && extras.containsKey(DISCUSSION)) {
+                    String discussionTitle = extras.getString(DISCUSSION);
+                    displaySocialFragment(discussionTitle, false);
+                }
+            }
+        }
     }
 
     @Override
@@ -435,19 +442,16 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
         if (result.getCode() == ObaApi.OBA_OK) {
             if (mStop == null) {
                 mStop = result.getStop();
-                DBUtil.addToDB(mStop);
+                addToDB(mStop);
             }
             info = result.getArrivalInfo();
             situations = UIUtils.getAllSituations(result, mRoutesFilter);
             refs = result.getRefs();
 
-            TravelBehaviorManager.saveArrivalInfo(info, result.getUrl(),
-                    result.getCurrentTime(), mStopId);
-
             // Report Stop distance metric
             Location stopLocation = mStop.getLocation();
             Location myLocation = Application.getLastKnownLocation(getActivity(), null);
-            ObaAnalytics.reportViewStopEvent(Application.get().getPlausibleInstance(), mFirebaseAnalytics, mStop.getId(), mStop.getName(), myLocation, stopLocation);
+            ObaAnalytics.reportViewStopEvent(mFirebaseAnalytics, mStop.getId(), mStop.getName(), myLocation, stopLocation);
         } else {
             // If there was a last good response, then this is a refresh
             // and we should use a toast. Otherwise, it's a initial
@@ -467,7 +471,6 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
         }
 
         setResponseData(info, situations, refs);
-        initSurveyManager();
 
         // The list should now be shown.
         if (isResumed()) {
@@ -507,7 +510,7 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
         }
 
         ShowcaseViewUtils.showTutorial(ShowcaseViewUtils.TUTORIAL_ARRIVAL_SORT,
-                (AppCompatActivity) getActivity(), null, false);
+                (AppCompatActivity) getActivity(), null);
 
         // Notify listener that we have new arrival info
         if (mListener != null) {
@@ -549,7 +552,7 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
         if (situations != null) {
             refreshSituations(situations);
         } else {
-            refreshSituations(new ArrayList<>());
+            refreshSituations(new ArrayList<ObaSituation>());
         }
 
         if (info != null) {
@@ -664,17 +667,6 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
             }
         } else if (id == R.id.night_light) {
             NightLightActivity.start(getActivity());
-        } else if (id == R.id.hide_alerts) {
-            if (mSituationAlerts == null || mSituationAlerts.isEmpty()) {
-                return false;
-            }
-            // Update the database to hide all currently active alerts at this stop
-            for (SituationAlert alert : mSituationAlerts) {
-                ObaContract.ServiceAlerts
-                        .insertOrUpdate(alert.getId(), new ContentValues(), false,
-                                true);
-            }
-            refresh();
         }
         return false;
     }
@@ -731,8 +723,6 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
         // Check route favorite, for whether we show "Add star" or "Remove star"
         final boolean isRouteFavorite = ObaContract.RouteHeadsignFavorites.isFavorite(routeId,
                 arrivalInfo.getInfo().getHeadsign(), arrivalInfo.getInfo().getStopId());
-        // Check to see if there is a route filter, for whether we show "Show all routes" or "Show only this route"
-        boolean hasRouteFilter = !mRoutesFilter.isEmpty();
 
         final Occupancy occupancy;
         final OccupancyState occupancyState;
@@ -748,10 +738,11 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
         }
 
         List<String> items = UIUtils
-                .buildTripOptions(getActivity(), isRouteFavorite, hasUrl, isReminderVisible, hasRouteFilter, occupancy, occupancyState);
+                .buildTripOptions(getActivity(), isRouteFavorite, hasUrl, isReminderVisible, occupancy, occupancyState);
         List<Integer> icons = UIUtils.buildTripOptionsIcons(isRouteFavorite, hasUrl, occupancy);
 
         ListAdapter adapter = new ArrayAdapterWithIcon(getActivity(), items, icons);
+        final boolean isSocialEnabled = EmbeddedSocialUtils.isSocialEnabled();
 
         builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
@@ -775,18 +766,10 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
                 } else if (which == 2) {
                     goToTripDetails(arrivalInfo);
                 } else if (which == 3) {
-                    if(ReminderUtils.shouldShowReminders()){
-                        goToTrip(arrivalInfo);
-                    }else{
-                        Toast.makeText(getActivity(), R.string.reminder_not_enabled, Toast.LENGTH_SHORT).show();
-                    }
+                    goToTrip(arrivalInfo);
                 } else if (which == 4) {
                     ArrayList<String> routes = new ArrayList<String>(1);
                     routes.add(arrivalInfo.getInfo().getRouteId());
-                    // toggle route filter - if user selection equals existing route filter, clear it
-                    if (routes.equals(mRoutesFilter) || mRoutesFilter.size() > routes.size()) {
-                        routes.clear();
-                    }
                     setRoutesFilter(routes);
                     if (mHeader != null) {
                         mHeader.refresh();
@@ -812,21 +795,81 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
                     InfrastructureIssueActivity.startWithService(getActivity(), intent,
                             getString(R.string.ri_selected_service_trip), arrivalInfo.getInfo(),
                             agencyName, blockId);
+                } else if (isSocialEnabled && ((!hasUrl && which == 6) || (hasUrl && which == 7))) {
+                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                            getActivity().getString(R.string.analytics_label_button_press_social_route_options),
+                            null);
+                    openRouteDiscussion(arrivalInfo.getInfo().getRouteId());
                 } else if (occupancy != null &&
-                        ((!hasUrl && which == 6) || (hasUrl && which == 7))) {
-                    ObaAnalytics.reportUiEvent(
-                            mFirebaseAnalytics,
-                            Application.get().getPlausibleInstance(),
-                            PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
+                        (((!hasUrl && !isSocialEnabled && which == 6) || (hasUrl && !isSocialEnabled && which == 7)) ||
+                                ((!hasUrl && isSocialEnabled && which == 7) || (hasUrl && isSocialEnabled && which == 8)))) {
+                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
                             getActivity().getString(R.string.analytics_label_button_press_about_occupancy),
                             null);
-                    createOccupancyDialog().show();
+                    createOccupancyDialog(occupancyState).show();
                 }
             }
         });
         AlertDialog dialog = builder.create();
         dialog.setOwnerActivity(getActivity());
         dialog.show();
+    }
+
+    /**
+     * Opens the discussion item related to this route ID
+     * @param routeId route ID to use
+     */
+    public void openRouteDiscussion(String routeId) {
+        String discussionTitle = "";
+        ObaRegion region = Application.get().getCurrentRegion();
+        if (region != null) {
+            discussionTitle = EmbeddedSocialUtils.createRouteDiscussionTitle(region.getId(), routeId);
+        }
+        openDiscussion(discussionTitle);
+    }
+
+    /**
+     * Opens the discussion item related to the currently selected stop
+     */
+    public void openStopDiscussion() {
+        String discussionTitle = "";
+        ObaRegion region = Application.get().getCurrentRegion();
+        if (region != null) {
+            discussionTitle = EmbeddedSocialUtils.createStopDiscussionTitle(region.getId(), getStopId());
+        }
+        openDiscussion(discussionTitle);
+    }
+
+    /**
+     * Opens a discussion item in an ArrivalsListActivity
+     * @param discussionTitle title of the Embedded Social topic
+     */
+    private void openDiscussion(String discussionTitle) {
+        if (getActivity() instanceof ArrivalsListActivity) {
+            // do not create a new instance of ArrivalsListActivity
+            if (getFragmentManager().findFragmentByTag(discussionTitle) == null) {
+                // only fetch this fragment if it is not already displayed
+                displaySocialFragment(discussionTitle, true);
+            }
+        } else {
+            ArrivalsListActivity.start(getContext(), getStopId(), getStopName(), getStopDirection(), discussionTitle);
+        }
+    }
+
+    /**
+     * Displays a social fragment
+     * @param discussionTitle title of the Embedded Social topic
+     * @param addToBackStack true if this transaction should be added to the back stack
+     */
+    public void displaySocialFragment(String discussionTitle, boolean addToBackStack) {
+        Fragment discussionFragment = EmbeddedSocialUtils.getDiscussionFragment(discussionTitle);
+
+        final FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.add(R.id.listContainer, discussionFragment, discussionTitle);
+        if (addToBackStack) {
+            transaction.addToBackStack(null);
+        }
+        transaction.commit();
     }
 
     private void setCallbackToDialogFragment(RouteFavoriteDialogFragment routeDialog) {
@@ -845,8 +888,6 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
         if (mListener != null) {
             handled = mListener.onShowRouteOnMapSelected(arrivalInfo);
         }
-        // Save to recent routes
-        DBUtil.addRouteToDB(getActivity(),arrivalInfo);
         // If the event hasn't been handled by the listener, start a new activity
         if (!handled) {
             HomeActivity.start(getActivity(), arrivalInfo.getInfo().getRouteId());
@@ -1030,10 +1071,7 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
         // menus like we did before...
         getActivity().supportInvalidateOptionsMenu();
 
-        ObaAnalytics.reportUiEvent(
-                mFirebaseAnalytics,
-                Application.get().getPlausibleInstance(),
-                PlausibleAnalytics.REPORT_BOOKMARK_EVENT_URL,
+        ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
                 getString(R.string.analytics_label_edit_field_bookmark),
                 null);
 
@@ -1157,7 +1195,7 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
         listParam.leftMargin = UIUtils.dpToPixels(getActivity(), 5);
         listParam.rightMargin = UIUtils.dpToPixels(getActivity(), 5);
         // Set the listview background to give the cards more contrast
-        getListView().getRootView().setBackgroundColor(
+        getListView().setBackgroundColor(
                 getResources().getColor(R.color.stop_info_arrival_list_background));
         // Update the layout parameters
         getListView().setLayoutParams(listParam);
@@ -1207,16 +1245,12 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
                             // Sort by eta
                             Log.d(TAG, "Sort by ETA");
                             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                                    Application.get().getPlausibleInstance(),
-                                    PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                                     getString(R.string.analytics_label_sort_by_eta_arrival),
                                     null);
                         } else if (index == 1) {
                             // Sort by route
                             Log.d(TAG, "Sort by route");
                             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                                    Application.get().getPlausibleInstance(),
-                                    PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                                     getString(R.string.analytics_label_sort_by_route_arrival),
                                     null);
                         }
@@ -1251,16 +1285,12 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
             // Currently we're showing arrivals in header - we need to remove them
             mHeader.showArrivals(false);
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                    Application.get().getPlausibleInstance(),
-                    PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                     getString(R.string.analytics_label_hide_arrivals_in_header),
                     null);
         } else {
             // Currently we're hiding arrivals - we need to show them
             mHeader.showArrivals(true);
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                    Application.get().getPlausibleInstance(),
-                    PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                     getString(R.string.analytics_label_show_arrivals_in_header),
                     null);
         }
@@ -1320,8 +1350,6 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
                 (String) stopDetails.second).show();
 
         ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                Application.get().getPlausibleInstance(),
-                PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                 getActivity().getString(R.string.analytics_label_button_press_stop_details),
                 null);
     }
@@ -1455,23 +1483,14 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
                 stopInfo.getRouteId(),
                 stopInfo.getShortName(),
                 mStop.getName(),
-                ReminderUtils.getReminderDepartureTime(stopInfo),
-                stopInfo.getHeadsign(),
-                stopInfo.getStopSequence(),
-                stopInfo.getServiceDate(),
-                stopInfo.getVehicleId());
+                stopInfo.getScheduledDepartureTime(),
+                stopInfo.getHeadsign());
     }
 
     private void goToTripDetails(ArrivalInfo stop) {
-
-        // Save to recent routes
-        DBUtil.addRouteToDB(getActivity(),stop);
-
-        new TripDetailsActivity.Builder(getActivity(), stop.getInfo().getTripId())
-                .setStopId(stop.getInfo().getStopId())
-                .setScrollMode(TripDetailsListFragment.SCROLL_MODE_STOP)
-                .setUpMode(NavHelp.UP_MODE_BACK)
-                .start();
+        TripDetailsActivity.start(getActivity(),
+                stop.getInfo().getTripId(), stop.getInfo().getStopId(),
+                TripDetailsListFragment.SCROLL_MODE_STOP);
     }
 
     private void goToRoute(ArrivalInfo stop) {
@@ -1504,8 +1523,6 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
         refresh();
 
         ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                Application.get().getPlausibleInstance(),
-                PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                 getActivity().getString(R.string.analytics_label_load_more_arrivals),
                 null);
     }
@@ -1582,6 +1599,22 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
                 c.close();
             }
         }
+    }
+
+    private void addToDB(ObaStop stop) {
+        String name = UIUtils.formatDisplayText(stop.getName());
+
+        // Update the database
+        ContentValues values = new ContentValues();
+        values.put(ObaContract.Stops.CODE, stop.getStopCode());
+        values.put(ObaContract.Stops.NAME, name);
+        values.put(ObaContract.Stops.DIRECTION, stop.getDirection());
+        values.put(ObaContract.Stops.LATITUDE, stop.getLatitude());
+        values.put(ObaContract.Stops.LONGITUDE, stop.getLongitude());
+        if (Application.get().getCurrentRegion() != null) {
+            values.put(ObaContract.Stops.REGION_ID, Application.get().getCurrentRegion().getId());
+        }
+        ObaContract.Stops.insertOrUpdate(stop.getId(), values, true);
     }
 
     private static final String[] TRIPS_PROJECTION = {
@@ -1718,8 +1751,6 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
 
         for (String agencyId : agencyIds) {
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                    Application.get().getPlausibleInstance(),
-                    PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                     getString(R.string.analytics_service_alerts),
                     getString(R.string.analytics_label_service_alerts) + agencyId);
         }
@@ -1772,72 +1803,35 @@ public class ArrivalsListFragment extends ListFragment implements LoaderManager.
     /**
      * Creates the dialog that will be shown to the user to explain the occupancy feature
      *
+     * @param occupancyState occupancy state for this trip
      * @return the dialog that will be shown to the user to explain the occupancy feature
      */
-    private Dialog createOccupancyDialog() {
+    private Dialog createOccupancyDialog(OccupancyState occupancyState) {
         androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(getContext());
-        builder.setTitle(R.string.menu_title_about_occupancy);
+        if (occupancyState == OccupancyState.HISTORICAL) {
+            builder.setTitle(R.string.menu_title_about_historical_occupancy);
+        } else {
+            builder.setTitle(R.string.menu_title_about_occupancy);
+        }
 
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View occupancyDialogView = inflater.inflate(R.layout.occupancy_dialog, null);
         builder.setView(occupancyDialogView);
-        ViewGroup realtimeOccupancy = occupancyDialogView.findViewById(R.id.realtime_occupancy);
-        ViewGroup historicalOccupancy = occupancyDialogView.findViewById(R.id.historical_occupancy);
 
-        UIUtils.setOccupancyVisibilityAndColor(realtimeOccupancy, Occupancy.FULL, OccupancyState.REALTIME);
-        UIUtils.setOccupancyVisibilityAndColor(historicalOccupancy, Occupancy.FULL, OccupancyState.HISTORICAL);
+        TextView occupancyDescription = occupancyDialogView.findViewById(R.id.occupancy_description);
+
+        if (occupancyState == OccupancyState.HISTORICAL) {
+            occupancyDescription.setText(R.string.menu_text_about_historical_occupancy);
+        } else {
+            occupancyDescription.setText(R.string.menu_text_about_occupancy);
+        }
+
+        // TODO - Implement About screen that includes real-time/predicted occupancy icons. Design is somewhat
+        // TBD at the moment, although I've added some placeholder coloring.  But let's wait to
+        // implement the full About until we've finalized the design.  We can use the main Legend as
+        // an example - see HomeActivity.createLegendDialog() and the legend_dialog.xml layout
 
         builder.setNeutralButton(R.string.main_help_close, (dialogInterface, i) -> dialogInterface.dismiss());
         return builder.create();
     }
-
-    private void initSurveyManager(){
-        // Avoiding doing multiple calls when updating the stop arrivals list
-        if(surveyManager == null){
-            View surveyView = getLayoutInflater().inflate(R.layout.item_survey,null);
-            surveyManager = new SurveyManager(requireContext(), surveyView,true, new SurveyListener() {
-                @Override
-                public void onSurveyResponseReceived(StudyResponse response) {
-                    surveyManager.onSurveyResponseReceived(response);
-                }
-
-                @Override
-                public void onSurveyResponseFail() {
-                    surveyManager.onSurveyResponseFail();
-                }
-
-                @Override
-                public void onSubmitSurveyResponseReceived(SubmitSurveyResponse response) {
-                    surveyManager.onSubmitSurveyResponseReceived(response);
-                }
-
-                @Override
-                public void onSubmitSurveyFail() {
-                    surveyManager.onSubmitSurveyFail();
-                }
-
-
-                @Override
-                public void onSkipSurvey() {
-                    surveyManager.onSkipSurvey();
-                }
-
-                @Override
-                public void onRemindMeLater() {
-                    surveyManager.onRemindMeLater();
-                }
-
-                @Override
-                public void onCancelSurvey() {
-                    surveyManager.onCancelSurvey();
-                }
-
-            });
-            surveyManager.initSurveyArrivalsList(getListView());
-            surveyManager.requestSurveyData();
-            surveyManager.setCurrentStop(mStop);
-        }
-    }
-
-
 }

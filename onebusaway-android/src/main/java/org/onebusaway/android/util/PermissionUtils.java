@@ -29,12 +29,9 @@ public class PermissionUtils {
     public static final int LOCATION_PERMISSION_REQUEST = 1;
     public static final int SAVE_BACKUP_PERMISSION_REQUEST = 2;
     public static final int RESTORE_BACKUP_PERMISSION_REQUEST = 3;
-    public static final int BACKGROUND_LOCATION_PERMISSION_REQUEST = 4;
-    public static final int NOTIFICATION_PERMISSION_REQUEST = 5;
 
     public static final String[] LOCATION_PERMISSIONS = {
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION
     };
 
     @SuppressLint("InlinedApi")
@@ -49,41 +46,16 @@ public class PermissionUtils {
      * @param requiredPermissions
      * @return true if all of the provided permissions in requiredPermissions have been granted, or false if they have not
      */
-    public static boolean hasGrantedAllPermissions(Context context, String[] requiredPermissions) {
-        for (String p : requiredPermissions) {
-            if (!hasGrantedPermission(context, p)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Returns true if AT LEAST ONE of the provided permissions in permissions have been granted, or false if none of them have been granted
-     * @param context
-     * @param permissions
-     * @return true if AT LEAST ONE of the provided permissions in permissions have been granted, or false if none of them have been granted
-     */
-    public static boolean hasGrantedAtLeastOnePermission(Context context, String[] permissions) {
-        for (String p : permissions) {
-            if (hasGrantedPermission(context, p)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Returns true if the provided permission in requiredPermission has been granted, or false if it has not
-     * @param context
-     * @param requiredPermission
-     * @return true if the provided permission in requiredPermission has been granted, or false if it has not
-     */
-    public static boolean hasGrantedPermission(Context context, String requiredPermission) {
+    public static boolean hasGrantedPermissions(Context context, String[] requiredPermissions) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             // Permissions granted at install time
             return true;
         }
-        return ContextCompat.checkSelfPermission(context, requiredPermission) == PackageManager.PERMISSION_GRANTED;
+        for (String p : requiredPermissions) {
+            if (ContextCompat.checkSelfPermission(context, p) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
     }
 }

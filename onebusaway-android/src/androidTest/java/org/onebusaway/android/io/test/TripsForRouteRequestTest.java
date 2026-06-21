@@ -62,7 +62,7 @@ public class TripsForRouteRequestTest extends ObaTestCase {
                 TEST_ROUTE_ID);
         ObaTripsForRouteRequest request = builder.build();
         UriAssert.assertUriMatch(
-                "https://api.tampa.onebusaway.org/api/api/where/trips-for-route/" + TEST_ROUTE_ID
+                "http://api.tampa.onebusaway.org/api/api/where/trips-for-route/" + TEST_ROUTE_ID
                         + ".json",
                 new HashMap<String, String>() {{
                     put("key", "*");
@@ -134,7 +134,7 @@ public class TripsForRouteRequestTest extends ObaTestCase {
         ObaTripsForRouteRequest request = ObaTripsForRouteRequest
                 .newRequest(getTargetContext(), TEST_ROUTE_ID);
         UriAssert.assertUriMatch(
-                "https://api.tampa.onebusaway.org/api/api/where/trips-for-route/" + TEST_ROUTE_ID
+                "http://api.tampa.onebusaway.org/api/api/where/trips-for-route/" + TEST_ROUTE_ID
                         + ".json",
                 new HashMap<String, String>() {{
                     put("key", "*");
@@ -176,38 +176,38 @@ public class TripsForRouteRequestTest extends ObaTestCase {
 
         // Occupancy - EMPTY
         ObaTripStatus status = trips[0].getStatus();
-        assertEquals(Occupancy.EMPTY, status.getOccupancyStatus());
+        assertEquals(Occupancy.EMPTY, status.getRealtimeOccupancy());
 
         // Occupancy - MANY_SEATS_AVAILABLE
         status = trips[1].getStatus();
-        assertEquals(Occupancy.MANY_SEATS_AVAILABLE, status.getOccupancyStatus());
+        assertEquals(Occupancy.MANY_SEATS_AVAILABLE, status.getRealtimeOccupancy());
 
         // Occupancy - FEW_SEATS_AVAILABLE
         status = trips[2].getStatus();
-        assertEquals(Occupancy.FEW_SEATS_AVAILABLE, status.getOccupancyStatus());
+        assertEquals(Occupancy.FEW_SEATS_AVAILABLE, status.getRealtimeOccupancy());
 
         // Occupancy - STANDING_ROOM_ONLY
         status = trips[3].getStatus();
-        assertEquals(Occupancy.STANDING_ROOM_ONLY, status.getOccupancyStatus());
+        assertEquals(Occupancy.STANDING_ROOM_ONLY, status.getRealtimeOccupancy());
 
         // Occupancy - CRUSHED_STANDING_ROOM_ONLY
         status = trips[4].getStatus();
-        assertEquals(Occupancy.CRUSHED_STANDING_ROOM_ONLY, status.getOccupancyStatus());
+        assertEquals(Occupancy.CRUSHED_STANDING_ROOM_ONLY, status.getRealtimeOccupancy());
 
         // Occupancy - FULL
         status = trips[5].getStatus();
-        assertEquals(Occupancy.FULL, status.getOccupancyStatus());
+        assertEquals(Occupancy.FULL, status.getRealtimeOccupancy());
 
         // Occupancy - NOT_ACCEPTING_PASSENGERS
         status = trips[6].getStatus();
-        assertEquals(Occupancy.NOT_ACCEPTING_PASSENGERS, status.getOccupancyStatus());
+        assertEquals(Occupancy.NOT_ACCEPTING_PASSENGERS, status.getRealtimeOccupancy());
 
         // Occupancy - Empty string
         status = trips[7].getStatus();
-        assertNull(status.getOccupancyStatus());
+        assertNull(status.getRealtimeOccupancy());
 
         // Occupancy - Missing field
         status = trips[8].getStatus();
-        assertNull(status.getOccupancyStatus());
+        assertNull(status.getRealtimeOccupancy());
     }
 }

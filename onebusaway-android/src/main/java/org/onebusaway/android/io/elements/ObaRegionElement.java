@@ -143,10 +143,6 @@ public class ObaRegionElement implements ObaRegion {
 
     private final String obaBaseUrl;
 
-    private final String sidecarBaseUrl;
-
-    private final String plausibleAnalyticsServerUrl;
-
     private final String siriBaseUrl;
 
     private final Bounds[] bounds;
@@ -175,8 +171,6 @@ public class ObaRegionElement implements ObaRegion {
 
     private final boolean supportsOtpBikeshare;
 
-    // Embedded Social is no longer supported
-    @Deprecated
     private final boolean supportsEmbeddedSocial;
 
     private final String paymentAndroidAppId;
@@ -184,10 +178,6 @@ public class ObaRegionElement implements ObaRegion {
     private final String paymentWarningTitle;
 
     private final String paymentWarningBody;
-
-    private final boolean travelBehaviorDataCollectionEnabled;
-
-    private final boolean enrollParticipantsInStudy;
 
     ObaRegionElement() {
         id = 0;
@@ -212,10 +202,6 @@ public class ObaRegionElement implements ObaRegion {
         paymentAndroidAppId = null;
         paymentWarningTitle = null;
         paymentWarningBody = null;
-        travelBehaviorDataCollectionEnabled = false;
-        enrollParticipantsInStudy = false;
-        sidecarBaseUrl = "";
-        plausibleAnalyticsServerUrl = "";
     }
 
     public ObaRegionElement(long id,
@@ -239,11 +225,7 @@ public class ObaRegionElement implements ObaRegion {
                             boolean supportsEmbeddedSocial,
                             String paymentAndroidAppId,
                             String paymentWarningTitle,
-                            String paymentWarningBody,
-                            boolean travelBehaviorDataCollectionEnabled,
-                            boolean enrollParticipantsInStudy,
-                            String sidecarBaseUrl,
-                            String plausibleAnalyticsServerUrl) {
+                            String paymentWarningBody) {
         this.id = id;
         this.regionName = name;
         this.active = active;
@@ -266,10 +248,6 @@ public class ObaRegionElement implements ObaRegion {
         this.paymentAndroidAppId = paymentAndroidAppId;
         this.paymentWarningTitle = paymentWarningTitle;
         this.paymentWarningBody = paymentWarningBody;
-        this.travelBehaviorDataCollectionEnabled = travelBehaviorDataCollectionEnabled;
-        this.enrollParticipantsInStudy = enrollParticipantsInStudy;
-        this.sidecarBaseUrl = sidecarBaseUrl;
-        this.plausibleAnalyticsServerUrl = plausibleAnalyticsServerUrl;
     }
 
     @Override
@@ -290,16 +268,6 @@ public class ObaRegionElement implements ObaRegion {
     @Override
     public String getObaBaseUrl() {
         return obaBaseUrl;
-    }
-
-    @Override
-    public String getSidecarBaseUrl() {
-        return sidecarBaseUrl;
-    }
-
-    @Override
-    public String getPlausibleAnalyticsServerUrl() {
-        return plausibleAnalyticsServerUrl;
     }
 
     @Override
@@ -393,16 +361,6 @@ public class ObaRegionElement implements ObaRegion {
     }
 
     @Override
-    public boolean isTravelBehaviorDataCollectionEnabled() {
-        return travelBehaviorDataCollectionEnabled;
-    }
-
-    @Override
-    public boolean isEnrollParticipantsInStudy() {
-        return enrollParticipantsInStudy;
-    }
-
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -457,8 +415,6 @@ public class ObaRegionElement implements ObaRegion {
                 ", paymentAndroidAppId=" + paymentAndroidAppId + '\'' +
                 ", paymentWarningTitle=" + paymentWarningTitle + '\'' +
                 ", paymentWarningBody=" + paymentWarningBody + '\'' +
-                ", sidecarBaseUrl=" + sidecarBaseUrl + '\'' +
-                ", plausibleAnalyticsServerUrl=" + plausibleAnalyticsServerUrl + '\'' +
                 '}';
     }
 }

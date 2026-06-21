@@ -16,6 +16,9 @@
  */
 package org.onebusaway.android.ui;
 
+import org.onebusaway.android.R;
+import org.onebusaway.android.provider.ObaContract;
+
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,9 +29,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-
-import org.onebusaway.android.R;
-import org.onebusaway.android.provider.ObaContract;
 
 import androidx.loader.content.Loader;
 
@@ -95,10 +95,6 @@ public class MyRecentRoutesFragment extends MyRouteListFragmentBase {
     }
 
     public static class ClearDialog extends ClearConfirmDialog {
-        
-        public ClearDialog() {
-            super(R.string.my_option_clear_recent_routes_confirm, R.string.my_option_clear_recent_routes_title);
-        }
 
         @Override
         protected void doClear() {

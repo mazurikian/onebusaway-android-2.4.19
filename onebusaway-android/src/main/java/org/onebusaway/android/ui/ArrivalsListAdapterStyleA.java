@@ -15,9 +15,15 @@
  */
 package org.onebusaway.android.ui;
 
+import org.onebusaway.android.R;
+import org.onebusaway.android.io.elements.ObaArrivalInfo;
+import org.onebusaway.android.io.elements.OccupancyState;
+import org.onebusaway.android.provider.ObaContract;
+import org.onebusaway.android.util.ArrivalInfoUtils;
+import org.onebusaway.android.util.UIUtils;
+
 import android.content.ContentValues;
 import android.content.Context;
-import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.view.View;
@@ -25,17 +31,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.core.graphics.drawable.DrawableCompat;
-
-import org.onebusaway.android.R;
-import org.onebusaway.android.io.elements.ObaArrivalInfo;
-import org.onebusaway.android.io.elements.OccupancyState;
-import org.onebusaway.android.io.elements.Status;
-import org.onebusaway.android.provider.ObaContract;
-import org.onebusaway.android.util.ArrivalInfoUtils;
-import org.onebusaway.android.util.UIUtils;
-
 import java.util.ArrayList;
+
+import androidx.core.graphics.drawable.DrawableCompat;
 
 /**
  * Original style of arrivals for OBA Android
@@ -73,7 +71,6 @@ public class ArrivalsListAdapterStyleA extends ArrivalsListAdapterBase<ArrivalIn
         TextView destination = (TextView) view.findViewById(R.id.destination);
         TextView time = (TextView) view.findViewById(R.id.time);
         TextView status = (TextView) view.findViewById(R.id.status);
-        TextView carCount = (TextView) view.findViewById(R.id.car_count);
         TextView etaView = (TextView) view.findViewById(R.id.eta);
         TextView minView = (TextView) view.findViewById(R.id.eta_min);
         ViewGroup realtimeView = (ViewGroup) view.findViewById(R.id.eta_realtime_indicator);
@@ -87,29 +84,12 @@ public class ArrivalsListAdapterStyleA extends ArrivalsListAdapterBase<ArrivalIn
                 R.drawable.focus_star_on :
                 R.drawable.focus_star_off);
 
-        // CANCELED trips
-        if (Status.CANCELED.equals(stopInfo.getStatus())) {
-            // Strike through the text fields
-            route.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
-            destination.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
-            time.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
-            etaView.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
-            minView.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
-        }
-
         String shortName = arrivalInfo.getShortName();
-        route.setText(shortName.trim());
-        UIUtils.maybeShrinkRouteName(getContext(), route, shortName.trim());
+        route.setText(shortName);
+        UIUtils.maybeShrinkRouteName(getContext(), route, shortName);
 
         destination.setText(UIUtils.formatDisplayText(arrivalInfo.getHeadsign()));
         status.setText(stopInfo.getStatusText());
-
-        String numCars = stopInfo.getInfo().getNumCars(getContext());
-        if (numCars != null) {
-            carCount.setBackgroundResource(R.drawable.round_corners_style_b_status);
-            carCount.setText(stopInfo.getInfo().getNumCars(getContext()));
-            carCount.setVisibility(View.VISIBLE);
-        }
 
         long eta = stopInfo.getEta();
         if (eta == 0) {
@@ -137,8 +117,6 @@ public class ArrivalsListAdapterStyleA extends ArrivalsListAdapterBase<ArrivalIn
         etaView.setTextColor(color);
         minView.setTextColor(color);
         d.setColor(color);
-
-        ((GradientDrawable) carCount.getBackground()).setColor(color);
 
         // Set padding on status view
         int pSides = UIUtils.dpToPixels(context, 5);

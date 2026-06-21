@@ -15,6 +15,27 @@
  */
 package org.onebusaway.android.map.googlemapsv2;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.onebusaway.android.R;
+import org.onebusaway.android.app.Application;
+import org.onebusaway.android.io.elements.ObaRoute;
+import org.onebusaway.android.io.elements.ObaTrip;
+import org.onebusaway.android.io.elements.ObaTripDetails;
+import org.onebusaway.android.io.elements.ObaTripStatus;
+import org.onebusaway.android.io.elements.OccupancyState;
+import org.onebusaway.android.io.request.ObaTripsForRouteResponse;
+import org.onebusaway.android.ui.TripDetailsActivity;
+import org.onebusaway.android.ui.TripDetailsListFragment;
+import org.onebusaway.android.util.ArrivalInfoUtils;
+import org.onebusaway.android.util.MathUtils;
+import org.onebusaway.android.util.UIUtils;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
@@ -30,36 +51,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.collection.LruCache;
-import androidx.core.content.ContextCompat;
-
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-
-import org.onebusaway.android.R;
-import org.onebusaway.android.app.Application;
-import org.onebusaway.android.io.elements.ObaRoute;
-import org.onebusaway.android.io.elements.ObaTrip;
-import org.onebusaway.android.io.elements.ObaTripDetails;
-import org.onebusaway.android.io.elements.ObaTripStatus;
-import org.onebusaway.android.io.elements.OccupancyState;
-import org.onebusaway.android.io.elements.Status;
-import org.onebusaway.android.io.request.ObaTripsForRouteResponse;
-import org.onebusaway.android.ui.TripDetailsActivity;
-import org.onebusaway.android.ui.TripDetailsListFragment;
-import org.onebusaway.android.util.ArrivalInfoUtils;
-import org.onebusaway.android.util.MathUtils;
-import org.onebusaway.android.util.UIUtils;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import androidx.collection.LruCache;
+import androidx.core.content.ContextCompat;
 
 /**
  * A map overlay that shows vehicle positions on the map
@@ -174,6 +173,9 @@ public class VehicleOverlay implements GoogleMap.OnInfoWindowClickListener, Mark
         if (mMarkerData != null) {
             mMarkerData.clear();
             mMarkerData = null;
+        }
+        if (mCustomInfoWindowAdapter != null) {
+            mCustomInfoWindowAdapter.cancelUpdates();
         }
     }
 
@@ -529,17 +531,17 @@ public class VehicleOverlay implements GoogleMap.OnInfoWindowClickListener, Mark
             // Show trip details screen for the vehicle associated with this marker
             ObaTripStatus status = mMarkerData.getStatusFromMarker(marker);
             if (status != null) {
-                if (mController != null && mController.getFocusedStopId() != null) {
-                    new TripDetailsActivity.Builder(mActivity, status.getActiveTripId())
-                            .setStopId(mController.getFocusedStopId())
-                            .setScrollMode(TripDetailsListFragment.SCROLL_MODE_VEHICLE)
-                            .setUpMode("back")
-                            .start();
-                } else {
-                    new TripDetailsActivity.Builder(mActivity, status.getActiveTripId())
-                            .setScrollMode(TripDetailsListFragment.SCROLL_MODE_VEHICLE)
-                            .setUpMode("back")
-                            .start();
+                // Stop any callbacks to refresh the vehicle marker popup balloons
+                mCustomInfoWindowAdapter.cancelUpdates();
+
+                if (status != null) {
+                    if (mController != null && mController.getFocusedStopId() != null) {
+                        TripDetailsActivity.start(mActivity, status.getActiveTripId(),
+                                mController.getFocusedStopId(), TripDetailsListFragment.SCROLL_MODE_VEHICLE);
+                    } else {
+                        TripDetailsActivity.start(mActivity, status.getActiveTripId(),
+                                TripDetailsListFragment.SCROLL_MODE_VEHICLE);
+                    }
                 }
             }
         }
@@ -554,7 +556,6 @@ public class VehicleOverlay implements GoogleMap.OnInfoWindowClickListener, Mark
 
     @Override
     public boolean markerClicked(Marker marker) {
-        if(mMarkerData == null) return false;
         ObaTripStatus status = mMarkerData.getStatusFromMarker(marker);
         if (status != null) {
             setupInfoWindow();
@@ -620,9 +621,9 @@ public class VehicleOverlay implements GoogleMap.OnInfoWindowClickListener, Mark
             for (ObaTripDetails trip : trips) {
                 ObaTripStatus status = trip.getStatus();
                 if (status != null) {
-                    // Check if this vehicle is running a route we're interested in and isn't CANCELED
+                    // Check if this vehicle is running a route we're interested in
                     String activeRoute = response.getTrip(status.getActiveTripId()).getRouteId();
-                    if (routeIds.contains(activeRoute) && !Status.CANCELED.equals(status.getStatus())) {
+                    if (routeIds.contains(activeRoute)) {
                         Location l = status.getLastKnownLocation();
                         boolean isRealtime = true;
 
@@ -958,10 +959,15 @@ public class VehicleOverlay implements GoogleMap.OnInfoWindowClickListener, Mark
             }
             lastUpdatedView.setText(lastUpdated);
 
-            if (status.getOccupancyStatus() != null) {
+            if (mMarkerRefreshHandler != null) {
+                mMarkerRefreshHandler.removeCallbacks(mMarkerRefresh);
+                mMarkerRefreshHandler.postDelayed(mMarkerRefresh, MARKER_REFRESH_PERIOD);
+            }
+
+            if (status.getRealtimeOccupancy() != null) {
                 // Real-time occupancy data
-                UIUtils.setOccupancyVisibilityAndColor(occupancyView, status.getOccupancyStatus(), OccupancyState.REALTIME);
-                UIUtils.setOccupancyContentDescription(occupancyView, status.getOccupancyStatus(), OccupancyState.REALTIME);
+                UIUtils.setOccupancyVisibilityAndColor(occupancyView, status.getRealtimeOccupancy(), OccupancyState.REALTIME);
+                UIUtils.setOccupancyContentDescription(occupancyView, status.getRealtimeOccupancy(), OccupancyState.REALTIME);
             } else {
                 // Hide occupancy by setting null value
                 UIUtils.setOccupancyVisibilityAndColor(occupancyView, null, OccupancyState.REALTIME);
@@ -971,6 +977,27 @@ public class VehicleOverlay implements GoogleMap.OnInfoWindowClickListener, Mark
             return view;
         }
 
+        private final long MARKER_REFRESH_PERIOD = TimeUnit.SECONDS.toMillis(1);
 
+        private final Handler mMarkerRefreshHandler = new Handler();
+
+        private final Runnable mMarkerRefresh = new Runnable() {
+            public void run() {
+                if (mCurrentFocusVehicleMarker != null &&
+                        mCurrentFocusVehicleMarker.isInfoWindowShown()) {
+                    // Force an update of the marker balloon, so "last updated" time ticks up
+                    mCurrentFocusVehicleMarker.showInfoWindow();
+                }
+            }
+        };
+
+        /**
+         * Cancels any pending updates of the marker balloon contents
+         */
+        public void cancelUpdates() {
+            if (mMarkerRefreshHandler != null) {
+                mMarkerRefreshHandler.removeCallbacks(mMarkerRefresh);
+            }
+        }
     }
 }
