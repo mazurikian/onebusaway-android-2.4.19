@@ -23,20 +23,18 @@ apply plugin: 'com.android.application'
 repositories {
     maven {
         // OBA Releases - for comparator to sort alphanumeric routes
-        url "http://nexus.onebusaway.org/nexus/content/repositories/releases"
+        url "https://repo.camsys-apps.com/releases"
     }
     maven {
         // for Amazon Maps
         url uri('../.m2/repository')
     }
     maven {
-        // CUTR Releases
+        // CUTR snapshots
         url "https://github.com/CUTR-at-USF/cutr-mvn-repo/raw/master/snapshots"
     }
-    maven {
-        // for testlib
-        url "http://dl.bintray.com/acrowntest/test"
-    }
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 android {
@@ -369,7 +367,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
     implementation 'commons-io:commons-io:2.4'
     // Open311 client library
-    implementation 'edu.usf.cutr:open311client:1.0.9'
+    implementation 'com.github.OneBusAway:open311-client:1.0.10'
     // JSON data binding for OBA REST API responses
     implementation 'com.fasterxml.jackson.core:jackson-core:2.9.4'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.9.4'
@@ -377,7 +375,7 @@ dependencies {
     // Bottom sliding panel
     implementation 'com.sothree.slidinguppanel:library:3.3.0'
     // For floating action button speed dial
-    implementation ('uk.co.markormesher:android-fab:2.2.0')
+    implementation 'com.github.OneBusAway:android-fab:2.4.1'
     // For sorting alphanumeric route names
     implementation 'org.onebusaway.util:comparators:1.0.0'
     // For tutorial (ShowcaseView) library
@@ -390,10 +388,10 @@ dependencies {
     googleImplementation 'com.google.android.gms:play-services-places:16.0.0'
     // Amazon Maps (only for Amazon flavor)
     amazonImplementation 'com.amazon.android:amazon-maps-api:2.0'
-    // Embedded Social SDK
-    implementation('com.acrowntest.test:sdk:0.7.4@aar') {
-        transitive = true
-    }
+    // Embedded Social SDK was hosted on Bintray as com.acrowntest.test:sdk:0.7.4,
+    // which is no longer resolvable.  The app includes local no-op stubs under
+    // src/main/java/com/microsoft/embeddedsocial so white-label builds with
+    // FIXED_REGION_SUPPORTS_EMBEDDEDSOCIAL=false can still compile.
     // Required to support multidex for minSdkVersion <= 20
     implementation 'androidx.multidex:multidex:2.0.0'
     // Unit tests - seems like this is still necessary w/ Android X even though useLibrary is declared earlier
